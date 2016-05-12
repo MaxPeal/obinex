@@ -5,16 +5,31 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/rpc"
 	"os"
+	"strings"
 )
 
 import (
 	"github.com/tarm/serial"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+var binChan = make(chan string)
+var outputChan = make(chan string)
+
+type Rpc struct{}
+
+func (r *Rpc) Run(bin string, reply *string) error {
+	log.Printf("RPC: binary request: %s\n", bin)
+	binChan <- bin
+	*reply = <-outputChan
+	return nil
+}
+
+func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: requested path: %s\n", r.URL.Path[1:])
-	f, err := os.Open("../octopos-jenkins/testcase.microbench")
+	bin := <-binChan
+	f, err := os.Open(bin)
 	if err != nil {
 		//todo
 		panic(err)
@@ -53,16 +68,26 @@ func getOutput(c chan string) {
 }
 
 func handleOutput(c chan string) {
+	var s string
 	for line := range c {
 		log.Printf("Output: %s", line)
+		s += line
+		if strings.TrimSpace(line) == "Graceful shutdown initiated" {
+			outputChan <- s
+			s = ""
+		}
 	}
 }
 
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", binaryServeHandler)
 	log.Println("Server: running")
 	c := make(chan string, 10)
 	go getOutput(c)
 	go handleOutput(c)
+
+	rpc.Register(new(Rpc))
+	rpc.HandleHTTP()
+
 	http.ListenAndServe(":12334", nil)
 }
