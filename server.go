@@ -14,18 +14,25 @@ import (
 	"github.com/tarm/serial"
 )
 
-var binChan = make(chan string)
-var outputChan = make(chan string)
+// Channels for synchronizing Run calls
+var (
+	binChan    = make(chan string)
+	outputChan = make(chan string)
+)
 
+// Rpc provides the public methods needed for rpc.
 type Rpc struct{}
 
-func (r *Rpc) Run(bin string, reply *string) error {
-	log.Printf("RPC: binary request: %s\n", bin)
-	binChan <- bin
+// Run allows a remote caller to request execution of a binary.
+// The Path should be absolute or relative to the _server_ binary.
+func (r *Rpc) Run(path string, reply *string) error {
+	log.Printf("RPC: binary request: %s\n", path)
+	binChan <- path
 	*reply = <-outputChan
 	return nil
 }
 
+// binaryServeHandler serves the binaries to the hardware.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: requested path: %s\n", r.URL.Path[1:])
 	bin := <-binChan
@@ -43,6 +50,8 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary served\n")
 }
 
+// getOutput handles the serial communication with the hardware.
+// The output is sent line by line to the provided channel.
 func getOutput(c chan string) {
 	conf := &serial.Config{
 		Name:   "/dev/ttyS0",
@@ -67,6 +76,7 @@ func getOutput(c chan string) {
 	}
 }
 
+// handleOutput takes output from the provided channel and distributes it.
 func handleOutput(c chan string) {
 	var s string
 	for line := range c {
