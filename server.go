@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +14,15 @@ import (
 import (
 	"github.com/tarm/serial"
 )
+
+// controlHosts contains the mapping of buddy hostname to hardware box hostname.
+var controlHosts map[string]string = map[string]string{
+	"faui49jenkins12": "faui49big01",
+	"faui49jenkins13": "faui49big02",
+	"faui49jenkins14": "faui49big03",
+	"faui49jenkins21": "faui49jenkins25",
+	"faui49bello2":    "fastbox",
+}
 
 // Channels for synchronizing Run calls
 var (
@@ -34,7 +44,7 @@ func (r *Rpc) Run(path string, reply *string) error {
 
 // binaryServeHandler serves the binaries to the hardware.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Server: requested path: %s\n", r.URL.Path[1:])
+	log.Printf("Server: binary requested\n")
 	bin := <-binChan
 	f, err := os.Open(bin)
 	if err != nil {
@@ -48,6 +58,20 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	log.Printf("Server: binary served\n")
+}
+
+// logHandler serves the logfile.
+func logHandler(w http.ResponseWriter, r *http.Request) {
+	f, err := os.Open("obinex.log")
+	if err != nil {
+		fmt.Fprint(w, err)
+	}
+	fmt.Fprint(w, "<html><body><pre>")
+	_, err = io.Copy(w, f)
+	if err != nil {
+		fmt.Fprint(w, err)
+	}
+	fmt.Fprint(w, "</pre></body></html>")
 }
 
 // getOutput handles the serial communication with the hardware.
@@ -90,8 +114,22 @@ func handleOutput(c chan string) {
 }
 
 func main() {
-	http.HandleFunc("/", binaryServeHandler)
-	log.Println("Server: running")
+	// log to stdout and a file
+	f, err := os.Create("obinex.log")
+	if err != nil {
+		log.Print("no log file:", err)
+	} else {
+		mw := io.MultiWriter(os.Stdout, f)
+		log.SetOutput(mw)
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.HandleFunc("/"+controlHosts[hostname], binaryServeHandler)
+	http.HandleFunc("/", logHandler)
+	log.Printf("Server: %s serving %s\n", hostname, controlHosts[hostname])
 	c := make(chan string, 10)
 	go getOutput(c)
 	go handleOutput(c)
