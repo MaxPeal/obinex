@@ -1,0 +1,6 @@
+[submodule "vendor/github.com/tarm/serial"]
+	path = vendor/github.com/tarm/serial
+	url = https://github.com/tarm/serial
+[submodule "vendor/github.com/fsnotify/fsnotify"]
+	path = vendor/github.com/fsnotify/fsnotify
+	url = https://github.com/fsnotify/fsnotify.git
