@@ -6,9 +6,9 @@ import (
 	"net/rpc"
 )
 
-//import (
-//"github.com/fsnotify/fsnotify"
-//)
+import (
+	"github.com/fsnotify/fsnotify"
+)
 
 const watchDir = "/proj/i4invasic/obinex"
 
@@ -21,42 +21,38 @@ func run(client *rpc.Client, bin string) string {
 	return res
 }
 
-/*
-func watch() {
+func watchAndRun(name string) {
+	client, err := rpc.DialHTTP("tcp", "localhost:12334")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer client.Close()
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer watcher.Close()
-	err = watcher.Add(watchdir + "/fastbox")
+	err = watcher.Add(watchDir + "/" + name)
 	if err != nil {
 		log.Fatal("fsnotify error:", err)
 	}
+	log.Println("Watcher: watching " + watchDir + "/" + name)
 
 	for {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Create == fsnotify.Create {
-				//add to list
-				//q.PushBack(event.Name)
-				//log.Println("----")
-				//for e := q.Front(); e != nil; e = e.Next() {
-				//log.Printf("%s\n", e.Value)
-				//}
+				log.Println("Watcher: ", event.Name)
+				s := run(client, event.Name)
+				fmt.Printf("%s", s)
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
 		}
 	}
 }
-*/
 
 func main() {
-	client, err := rpc.DialHTTP("tcp", "localhost:12334")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
-
-	s := run(client, "../octopos-jenkins/testcase.microbench")
-	fmt.Printf("%s", s)
+	watchAndRun("fastbox")
 }
