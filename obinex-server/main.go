@@ -12,9 +12,9 @@ import (
 )
 
 import (
-	o "gitlab.cs.fau.de/luksen/obinex"
-
 	"github.com/tarm/serial"
+	o "gitlab.cs.fau.de/luksen/obinex"
+	"golang.org/x/net/websocket"
 )
 
 // Channels for synchronizing Run calls
@@ -22,6 +22,10 @@ var (
 	binChan    = make(chan string)
 	outputChan = make(chan string)
 )
+
+// Channel for weblog output via websocket
+var wsChan = make(chan string)
+var wsAddChan = o.Broadcast(wsChan)
 
 // Rpc provides the public methods needed for rpc.
 type Rpc struct{}
@@ -53,18 +57,28 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary served\n")
 }
 
-// logHandler serves the logfile.
+// logHandler serves the website to view the logfile.
 func logHandler(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("obinex.log")
+	f, err := os.Open("weblog.html")
 	if err != nil {
 		fmt.Fprint(w, err)
+		return
 	}
-	fmt.Fprint(w, "<html><body><pre>")
 	_, err = io.Copy(w, f)
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
-	fmt.Fprint(w, "</pre></body></html>")
+}
+
+// logWebsocket sends log data to the javascript website
+func logWebsocket(ws *websocket.Conn) {
+	c := make(chan string)
+	wsAddChan <- c
+	for {
+		line := <-c
+		fmt.Fprintf(ws, line)
+	}
+	ws.Close()
 }
 
 // getOutput handles the serial communication with the hardware.
@@ -103,6 +117,7 @@ func handleOutput(c chan string) {
 			outputChan <- s
 			s = ""
 		}
+		wsChan <- line
 	}
 }
 
@@ -123,6 +138,7 @@ func main() {
 	http.HandleFunc("/"+o.ControlHosts[hostname], binaryServeHandler)
 	http.HandleFunc("/", logHandler)
 	log.Printf("Server: %s serving %s\n", hostname, o.ControlHosts[hostname])
+	http.Handle("/logws", websocket.Handler(logWebsocket))
 	c := make(chan string, 10)
 	go getOutput(c)
 	go handleOutput(c)

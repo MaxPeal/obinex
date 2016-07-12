@@ -1,0 +1,20 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Obinex Log</title>
+
+	<script type="text/javascript" charset="utf-8">
+
+var ws = new WebSocket("ws://faui49bello2.informatik.uni-erlangen.de:12334/logws");
+ws.onmessage = function(evt) {
+	var message = evt.data;
+	document.getElementById("wsdata").innerHTML += message;
+};
+
+	</script>
+</head>
+<body>
+	<h1>Live Output:</h1>
+	<pre id="wsdata"></pre>
+</body>
+</html>
