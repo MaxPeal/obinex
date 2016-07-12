@@ -9,6 +9,8 @@ import (
 )
 
 import (
+	o "gitlab.cs.fau.de/luksen/obinex"
+
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -67,5 +69,9 @@ func watchAndRun(name string) {
 }
 
 func main() {
-	watchAndRun("fastbox")
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatal(err)
+	}
+	watchAndRun(o.ControlHosts[hostname])
 }

@@ -12,17 +12,10 @@ import (
 )
 
 import (
+	o "gitlab.cs.fau.de/luksen/obinex"
+
 	"github.com/tarm/serial"
 )
-
-// controlHosts contains the mapping of buddy hostname to hardware box hostname.
-var controlHosts map[string]string = map[string]string{
-	"faui49jenkins12": "faui49big01",
-	"faui49jenkins13": "faui49big02",
-	"faui49jenkins14": "faui49big03",
-	"faui49jenkins21": "faui49jenkins25",
-	"faui49bello2":    "fastbox",
-}
 
 // Channels for synchronizing Run calls
 var (
@@ -127,9 +120,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.HandleFunc("/"+controlHosts[hostname], binaryServeHandler)
+	http.HandleFunc("/"+o.ControlHosts[hostname], binaryServeHandler)
 	http.HandleFunc("/", logHandler)
-	log.Printf("Server: %s serving %s\n", hostname, controlHosts[hostname])
+	log.Printf("Server: %s serving %s\n", hostname, o.ControlHosts[hostname])
 	c := make(chan string, 10)
 	go getOutput(c)
 	go handleOutput(c)
