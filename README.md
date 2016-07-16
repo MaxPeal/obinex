@@ -1,13 +1,13 @@
 Automatically execute OS binaries on the real hardware.
 
-#Installation
+# Installation
 
     go install gitlab.cs.fau.de/luksen/obinex/...
 
 `obinex-server/weblog.html` needs to be copied to the directory where
 `obinex-server` is run.
 
-#Architecture
+# Architecture
 
        +--------------------------+         +-----------------------+        +---------+
        |        Gateway PC        |         |    Buddy PCs          | serial |   HW    |
