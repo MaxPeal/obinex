@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -59,12 +60,24 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 
 // logHandler serves the website to view the logfile.
 func logHandler(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("weblog.html")
+	t, err := template.ParseFiles("weblog.html")
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
 	}
-	_, err = io.Copy(w, f)
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Fprint(w, err)
+		return
+	}
+	data := struct {
+		Hostname    string
+		HardwareBox string
+	}{
+		Hostname:    hostname,
+		HardwareBox: o.ControlHosts[hostname],
+	}
+	err = t.Execute(w, data)
 	if err != nil {
 		fmt.Fprint(w, err)
 	}

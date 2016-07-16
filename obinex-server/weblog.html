@@ -5,7 +5,7 @@
 
 	<script type="text/javascript" charset="utf-8">
 
-var ws = new WebSocket("ws://faui49bello2.informatik.uni-erlangen.de:12334/logws");
+var ws = new WebSocket("ws://{{.Hostname}}.informatik.uni-erlangen.de:12334/logws");
 ws.onmessage = function(evt) {
 	var message = evt.data;
 	document.getElementById("wsdata").innerHTML += message;
@@ -14,7 +14,7 @@ ws.onmessage = function(evt) {
 	</script>
 </head>
 <body>
-	<h1>Live Output:</h1>
+<h1>Live output from {{.HardwareBox}}:</h1>
 	<pre id="wsdata"></pre>
 </body>
 </html>
