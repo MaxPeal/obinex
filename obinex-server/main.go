@@ -126,7 +126,9 @@ func handleOutput(c chan string) {
 	for line := range c {
 		log.Printf("Output: %s", line)
 		s += line
-		if strings.TrimSpace(line) == "Graceful shutdown initiated" {
+		parseLine := strings.TrimSpace(line)
+		if parseLine == "Graceful shutdown initiated" ||
+			strings.HasPrefix(parseLine, "Could not boot") {
 			outputChan <- s
 			s = ""
 		}
