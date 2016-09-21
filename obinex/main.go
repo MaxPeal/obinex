@@ -37,7 +37,9 @@ func handleOutput(box, bin, s string) {
 }
 
 func watchAndRun(name string) {
-	client, err := rpc.DialHTTP("tcp", "localhost:12334")
+	box := o.ControlHosts[name]
+
+	client, err := rpc.DialHTTP("tcp", name+":12334")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
@@ -48,11 +50,12 @@ func watchAndRun(name string) {
 		log.Fatal(err)
 	}
 	defer watcher.Close()
-	err = watcher.Add(watchDir + "/" + name)
+	watching := watchDir + "/" + box
+	err = watcher.Add(watching)
 	if err != nil {
 		log.Fatal("fsnotify error:", err)
 	}
-	log.Println("Watcher: watching " + watchDir + "/" + name)
+	log.Println("Watcher: watching " + watching)
 
 	for {
 		select {
@@ -60,7 +63,7 @@ func watchAndRun(name string) {
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				log.Println("Watcher:", event.Name)
 				s := run(client, event.Name)
-				handleOutput(name, filepath.Base(event.Name), s)
+				handleOutput(box, filepath.Base(event.Name), s)
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
@@ -69,9 +72,10 @@ func watchAndRun(name string) {
 }
 
 func main() {
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
-	}
-	watchAndRun(o.ControlHosts[hostname])
+	//hostname, err := os.Hostname()
+	//if err != nil {
+	//log.Fatal(err)
+	//}
+	watchAndRun("faui49bello2")
+	// add other hosts here for 1 to N paradigm
 }
