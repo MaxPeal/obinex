@@ -11,9 +11,10 @@ Automatically execute OS binaries on the real hardware.
 
 Run `obinex-server` on a buddy PC and (for now) run `obinex` on the same server.
 
-To queue up a binary put it in `/proj/i4invasic/obinex/<boxname>`. Once the
-hardware box is free the binary will run the its output will be placed in
-`/proj/i4invasic/obinex/<boxname>/out`.
+To queue up a binary put it in
+`/proj/i4invasic/obinex/<boxname>/in/<somedir>/`. Once the hardware box is free
+the binary will run and, along with its output, be placed in
+`/proj/i4invasic/obinex/<boxname>/out/<somedir>_YYYY_MM_DD_hh_mm/`.
 
 You can look at the current output of any hardware box at
 `http://<buddy>.informatik.uni-erlangen.de:12334/`.
