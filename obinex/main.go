@@ -5,6 +5,7 @@ import (
 	"net/rpc"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -25,9 +26,29 @@ func run(client *rpc.Client, bin string) string {
 	return res
 }
 
-func handleOutput(box, bin, s string) {
+func handleOutput(box, path, s string) {
 	t := time.Now().Format("_2006_01_02_15_04")
-	f, err := os.Create(watchDir + "/" + box + "/out/" + bin + t + ".txt")
+	dir, bin := filepath.Split(path)
+	// Create directories in out
+	dir = strings.SplitN(dir, string(filepath.Separator), 7)[6]
+	base := filepath.Base(dir)
+	dir = filepath.Dir(dir[:len(dir)-1])
+	dir = filepath.Join(watchDir, box, "out", dir, base+t)
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		log.Println("Output Error:", err)
+		return
+	}
+
+	// Move bin
+	err = os.Rename(path, filepath.Join(dir, bin))
+	if err != nil {
+		log.Println("Output Error:", err)
+		return
+	}
+
+	// Write output file
+	f, err := os.Create(filepath.Join(dir, "output.txt"))
 	if err != nil {
 		log.Println("Output Error:", err)
 		return
@@ -52,21 +73,45 @@ func watchAndRun(name string) {
 		return
 	}
 	defer watcher.Close()
-	watching := watchDir + "/" + box
-	err = watcher.Add(watching)
-	if err != nil {
-		log.Println("fsnotify error:", err)
-		return
-	}
-	log.Println("Watcher: watching " + watching)
+
+	watching := watchDir + "/" + box + "/in/"
+	err = filepath.Walk(watching, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() == false {
+			return nil
+		}
+
+		err = watcher.Add(path)
+		if err != nil {
+			log.Println("fsnotify error:", err)
+			return nil
+		}
+		log.Println("Watcher: watching " + path)
+		return nil
+	})
 
 	for {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Create == fsnotify.Create {
-				log.Println("Watcher:", event.Name)
+				info, err := os.Stat(event.Name)
+				if err != nil {
+					log.Println(err)
+					break
+				}
+				if info.IsDir() {
+					err = watcher.Add(event.Name)
+					if err != nil {
+						log.Println("fsnotify error:", err)
+					}
+					log.Println("Watcher: watching " + event.Name)
+					break
+				}
+				log.Println("Watcher: running", event.Name)
 				s := run(client, event.Name)
-				handleOutput(box, filepath.Base(event.Name), s)
+				handleOutput(box, event.Name, s)
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
