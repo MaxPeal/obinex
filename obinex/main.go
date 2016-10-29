@@ -28,12 +28,11 @@ func run(client *rpc.Client, bin string) string {
 
 func handleOutput(box, path, s string) {
 	t := time.Now().Format("_2006_01_02_15_04")
-	dir, bin := filepath.Split(path)
 	// Create directories in out
-	dir = strings.SplitN(dir, string(filepath.Separator), 7)[6]
-	base := filepath.Base(dir)
+	dir := strings.SplitN(path, string(filepath.Separator), 7)[6]
+	bin := filepath.Base(dir)
 	dir = filepath.Dir(dir[:len(dir)-1])
-	dir = filepath.Join(watchDir, box, "out", dir, base+t)
+	dir = filepath.Join(watchDir, box, "out", dir, bin+t)
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		log.Println("Output Error:", err)
