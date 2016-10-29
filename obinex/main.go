@@ -41,19 +41,22 @@ func watchAndRun(name string) {
 
 	client, err := rpc.DialHTTP("tcp", name+":12334")
 	if err != nil {
-		log.Fatal("dialing:", err)
+		log.Println("dialing:", err)
+		return
 	}
 	defer client.Close()
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	defer watcher.Close()
 	watching := watchDir + "/" + box
 	err = watcher.Add(watching)
 	if err != nil {
-		log.Fatal("fsnotify error:", err)
+		log.Println("fsnotify error:", err)
+		return
 	}
 	log.Println("Watcher: watching " + watching)
 
@@ -76,6 +79,9 @@ func main() {
 	//if err != nil {
 	//log.Fatal(err)
 	//}
-	watchAndRun("faui49bello2")
 	// add other hosts here for 1 to N paradigm
+	watchAndRun("faui49bello2")
+	watchAndRun("faui49jenkins12")
+	watchAndRun("faui49jenkins13")
+	watchAndRun("faui49jenkins14")
 }
