@@ -8,13 +8,16 @@
 var ws = new WebSocket("ws://{{.Hostname}}:12334/logws");
 ws.onmessage = function(evt) {
 	var message = evt.data;
-	document.getElementById("wsdata").innerHTML += message;
+	document.getElementById("log").innerHTML += message;
 };
 
 	</script>
 </head>
 <body>
-<h1>Live output from {{.HardwareBox}}:</h1>
-	<pre id="wsdata"></pre>
+<h1>{{.HardwareBox}}</h1>
+<h2>Queue:</h2>
+{{if .Queue}}{{range .Queue}}{{.}}</br>{{end}}{{else}}empty{{end}}
+<h2>Live output:</h2>
+	<pre id="log"></pre>
 </body>
 </html>

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -18,15 +19,21 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// binQueue lists all queued binaries.
+// This is non-functional purely for logging etc.
+var binQueue []string
+
 // Channels for synchronizing Run calls
 var (
 	binChan    = make(chan string)
 	outputChan = make(chan string)
 )
 
-// Channel for weblog output via websocket
-var wsChan = make(chan string)
-var wsAddChan = o.Broadcast(wsChan)
+// Channels for weblog output via websocket
+var (
+	wsChan    = make(chan string)
+	wsAddChan = o.Broadcast(wsChan)
+)
 
 // Rpc provides the public methods needed for rpc.
 type Rpc struct{}
@@ -35,6 +42,7 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(path string, reply *string) error {
 	log.Printf("RPC: binary request: %s\n", path)
+	binQueue = append(binQueue, filepath.Base(path))
 	binChan <- path
 	*reply = <-outputChan
 	return nil
@@ -73,9 +81,11 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Hostname    string
 		HardwareBox string
+		Queue       []string
 	}{
 		Hostname:    hostname,
 		HardwareBox: o.ControlHosts[hostname],
+		Queue:       binQueue,
 	}
 	err = t.Execute(w, data)
 	if err != nil {
@@ -84,6 +94,7 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // logWebsocket sends log data to the javascript website
+// TODO: make websocket data extendable (struct/json)
 func logWebsocket(ws *websocket.Conn) {
 	c := make(chan string)
 	wsAddChan <- c
@@ -127,8 +138,10 @@ func handleOutput(c chan string) {
 		log.Printf("Output: %s", line)
 		s += line
 		parseLine := strings.TrimSpace(line)
+		// detect end of execution
 		if parseLine == "Graceful shutdown initiated" ||
 			strings.HasPrefix(parseLine, "Could not boot") {
+			binQueue = binQueue[:len(binQueue)-1]
 			outputChan <- s
 			s = ""
 		}
