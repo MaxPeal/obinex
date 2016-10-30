@@ -14,7 +14,7 @@ var ControlHosts map[string]string = map[string]string{
 
 // Broadcast enables multiple reads from a channel.
 // Subscribe by sending a channel into the returned Channel. The subscribed
-// channel will now receive all messages sent into the original channel.
+// channel will now receive all messages sent into the original channel (c).
 func Broadcast(c chan string) chan<- chan string {
 	cNewChans := make(chan chan string)
 	go func() {
