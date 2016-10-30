@@ -29,11 +29,47 @@ var (
 	outputChan = make(chan string)
 )
 
+// WebData should be used to send data via the websocket
+type WebData struct {
+	LogLine string
+	Queue   []string
+}
+
 // Channels for weblog output via websocket
 var (
-	wsChan    = make(chan string)
-	wsAddChan = o.Broadcast(wsChan)
+	wsChan    = make(chan WebData)
+	wsAddChan = Broadcast(wsChan)
 )
+
+// Broadcast enables multiple reads from a channel.
+// Subscribe by sending a channel into the returned Channel. The subscribed
+// channel will now receive all messages sent into the original channel (c).
+// TODO: see if possible to make generic for common.go
+func Broadcast(c chan WebData) chan<- chan WebData {
+	cNewChans := make(chan chan WebData)
+	go func() {
+		cs := make([]chan WebData, 5)
+		for {
+			select {
+			case newChan := <-cNewChans:
+				cs = append(cs, newChan)
+			case e := <-c:
+				for _, outC := range cs {
+					// send non-blocking to avoid one
+					// channel breaking the whole
+					// broadcast
+					select {
+					case outC <- e:
+						break
+					default:
+						break
+					}
+				}
+			}
+		}
+	}()
+	return cNewChans
+}
 
 // Rpc provides the public methods needed for rpc.
 type Rpc struct{}
@@ -43,6 +79,7 @@ type Rpc struct{}
 func (r *Rpc) Run(path string, reply *string) error {
 	log.Printf("RPC: binary request: %s\n", path)
 	binQueue = append(binQueue, filepath.Base(path))
+	wsChan <- WebData{Queue: binQueue}
 	binChan <- path
 	*reply = <-outputChan
 	return nil
@@ -81,11 +118,9 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Hostname    string
 		HardwareBox string
-		Queue       []string
 	}{
 		Hostname:    hostname,
 		HardwareBox: o.ControlHosts[hostname],
-		Queue:       binQueue,
 	}
 	err = t.Execute(w, data)
 	if err != nil {
@@ -94,13 +129,14 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // logWebsocket sends log data to the javascript website
-// TODO: make websocket data extendable (struct/json)
 func logWebsocket(ws *websocket.Conn) {
-	c := make(chan string)
+	// immediately show queue on website
+	websocket.JSON.Send(ws, WebData{Queue: binQueue})
+	c := make(chan WebData)
 	wsAddChan <- c
 	for {
-		line := <-c
-		fmt.Fprintf(ws, line)
+		wd := <-c
+		websocket.JSON.Send(ws, wd)
 	}
 	ws.Close()
 }
@@ -142,10 +178,11 @@ func handleOutput(c chan string) {
 		if parseLine == "Graceful shutdown initiated" ||
 			strings.HasPrefix(parseLine, "Could not boot") {
 			binQueue = binQueue[:len(binQueue)-1]
+			wsChan <- WebData{Queue: binQueue}
 			outputChan <- s
 			s = ""
 		}
-		wsChan <- line
+		wsChan <- WebData{LogLine: line}
 	}
 }
 
