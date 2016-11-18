@@ -17,7 +17,6 @@ import (
 
 const watchDir = "/proj/i4invasic/obinex/"
 
-// TODO: make async
 func run(client *rpc.Client, bin string) string {
 	var res string
 	err := client.Call("Rpc.Run", bin, &res)
