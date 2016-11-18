@@ -110,8 +110,10 @@ func watchAndRun(name string) {
 					break
 				}
 				log.Println("Watcher: running", event.Name)
-				s := run(client, event.Name)
-				handleOutput(box, event.Name, s)
+				go func() {
+					s := run(client, event.Name)
+					handleOutput(box, event.Name, s)
+				}()
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)

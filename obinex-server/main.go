@@ -177,7 +177,7 @@ func handleOutput(c chan string) {
 		// detect end of execution
 		if parseLine == "Graceful shutdown initiated" ||
 			strings.HasPrefix(parseLine, "Could not boot") {
-			binQueue = binQueue[:len(binQueue)-1]
+			binQueue = binQueue[1:]
 			wsChan <- WebData{Queue: binQueue}
 			outputChan <- s
 			s = ""
