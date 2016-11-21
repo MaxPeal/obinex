@@ -25,8 +25,9 @@ var binQueue []string
 
 // Channels for synchronizing Run calls
 var (
-	binChan    = make(chan string)
-	outputChan = make(chan string)
+	binChan     = make(chan string)
+	outputChan  = make(chan string)
+	abandonChan = make(chan struct{})
 )
 
 // WebData should be used to send data via the websocket
@@ -82,6 +83,14 @@ func (r *Rpc) Run(path string, reply *string) error {
 	wsChan <- WebData{Queue: binQueue}
 	binChan <- path
 	*reply = <-outputChan
+	log.Printf("RPC: binary request return: %s\n", path)
+	return nil
+}
+
+// Abandon tells the server to move on to the next binary.
+func (r *Rpc) Abandon(_ struct{}, _ *struct{}) error {
+	log.Printf("RPC: abandon current binary")
+	abandonChan <- struct{}{}
 	return nil
 }
 
@@ -170,19 +179,27 @@ func getOutput(c chan string) {
 // handleOutput takes output from the provided channel and distributes it.
 func handleOutput(c chan string) {
 	var s string
-	for line := range c {
-		log.Printf("Output: %s", line)
-		s += line
-		parseLine := strings.TrimSpace(line)
-		// detect end of execution
-		if parseLine == "Graceful shutdown initiated" ||
-			strings.HasPrefix(parseLine, "Could not boot") {
-			binQueue = binQueue[1:]
-			wsChan <- WebData{Queue: binQueue}
-			outputChan <- s
-			s = ""
+	endOfBin := func() {
+		binQueue = binQueue[1:]
+		wsChan <- WebData{Queue: binQueue}
+		outputChan <- s
+		s = ""
+	}
+	for {
+		select {
+		case line := <-c:
+			log.Printf("Output: %s", line)
+			s += line
+			parseLine := strings.TrimSpace(line)
+			// detect end of execution
+			if parseLine == "Graceful shutdown initiated" ||
+				strings.HasPrefix(parseLine, "Could not boot") {
+				endOfBin()
+			}
+			wsChan <- WebData{LogLine: line}
+		case <-abandonChan:
+			endOfBin()
 		}
-		wsChan <- WebData{LogLine: line}
 	}
 }
 
