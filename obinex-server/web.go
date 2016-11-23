@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 )
@@ -81,9 +82,12 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 
 // logWebsocket sends log data to the javascript website
 func logWebsocket(ws *websocket.Conn) {
+	log.Printf("Web: connection to websocket")
 	// immediately show queue on website
 	websocket.JSON.Send(ws, WebData{Queue: binQueue})
-	c := make(chan WebData)
+	// give the channel some buffer to avoid message loss (see also comment
+	// about blocking in Broadcast
+	c := make(chan WebData, 10)
 	wsAddChan <- c
 	for {
 		wd := <-c
