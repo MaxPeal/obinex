@@ -126,8 +126,8 @@ func main() {
 	//log.Fatal(err)
 	//}
 	// add other hosts here for 1 to N paradigm
-	watchAndRun("faui49bello2")
 	watchAndRun("faui49jenkins12")
 	watchAndRun("faui49jenkins13")
 	watchAndRun("faui49jenkins14")
+	watchAndRun("faui49jenkins15")
 }
