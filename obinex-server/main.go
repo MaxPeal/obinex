@@ -17,6 +17,9 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// testDone is used by the testsuite
+var testDone = make(chan bool)
+
 // binQueue lists all queued binaries.
 // This is non-functional purely for logging etc.
 var binQueue []string
@@ -140,6 +143,9 @@ func handleOutput(c chan string) {
 			}
 			runningBin = true
 			log.Printf("Server: start of binary output\n")
+		case <-testDone:
+			log.Println("Test: exiting handleOutput")
+			return
 		}
 	}
 }

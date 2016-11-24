@@ -61,22 +61,12 @@ func TestBinaryServeHandler(t *testing.T) {
 
 func TestHandleOutput(t *testing.T) {
 	c := make(chan string)
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-wsChan:
-				break
-			case <-done:
-				return
-			}
-		}
-	}()
-	defer func() { done <- true }()
+
+	go handleOutput(c)
+	defer func() { testDone <- true }()
 
 	// test normal operation
 	binQueue = []string{"foo"}
-	go handleOutput(c)
 	activateOutputChan <- struct{}{}
 	c <- "foo\n"
 	c <- o.EndMarker + "\n"
@@ -104,4 +94,7 @@ func TestHandleOutput(t *testing.T) {
 		t.Errorf("string = %s, want foo", s)
 	}
 
+	c <- o.EndMarker + "\n"
+	<-outputChan
+}
 }
