@@ -41,7 +41,7 @@ func TestBinaryServeHandler(t *testing.T) {
 	<-done
 
 	if b := w.Body.String(); !strings.Contains(b, "foo") {
-		t.Error("body = %s, want foo", b)
+		t.Errorf("body = %s, want foo", b)
 	}
 
 	// test without file
@@ -55,7 +55,7 @@ func TestBinaryServeHandler(t *testing.T) {
 	<-done
 
 	if c := w.Code; c != http.StatusInternalServerError {
-		t.Error("code = %d, want %d", c, http.StatusInternalServerError)
+		t.Errorf("code = %d, want %d", c, http.StatusInternalServerError)
 	}
 }
 
@@ -82,7 +82,7 @@ func TestHandleOutput(t *testing.T) {
 	c <- o.EndMarker + "\n"
 	s := <-outputChan
 	if s != "foo\n"+o.EndMarker+"\n" {
-		t.Error("string = %s, want fooGraceful...", s)
+		t.Errorf("string = %s, want fooGraceful...", s)
 	}
 
 	// test abandoned bin
@@ -91,7 +91,7 @@ func TestHandleOutput(t *testing.T) {
 	c <- o.EndMarker + "\n"
 	s = <-outputChan
 	if s != o.EndMarker+"\n" {
-		t.Error("string = %s, want %s", s, o.EndMarker)
+		t.Errorf("string = %s, want %s", s, o.EndMarker)
 	}
 
 	// test late detection
@@ -101,7 +101,7 @@ func TestHandleOutput(t *testing.T) {
 	activateOutputChan <- struct{}{}
 	s = <-outputChan
 	if s != "foo\n" {
-		t.Error("string = %s, want foo", s)
+		t.Errorf("string = %s, want foo", s)
 	}
 
 }
