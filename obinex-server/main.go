@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -35,7 +34,12 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(path string, reply *string) error {
 	log.Printf("RPC: binary request: %s\n", path)
-	binQueue = append(binQueue, filepath.Base(path))
+	var boxname string
+	hostname, err := os.Hostname()
+	if err == nil {
+		boxname = o.ControlHosts[hostname]
+	}
+	binQueue = append(binQueue, path[len(o.WatchDir)+len(boxname)+4:])
 	wsChan <- WebData{Queue: binQueue}
 	binChan <- path
 	*reply = <-outputChan

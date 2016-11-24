@@ -15,8 +15,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const watchDir = "/proj/i4invasic/obinex/"
-
 func run(client *rpc.Client, bin string) string {
 	var res string
 	err := client.Call("Rpc.Run", bin, &res)
@@ -32,7 +30,7 @@ func handleOutput(box, path, s string) {
 	dir := strings.SplitN(path, string(filepath.Separator), 7)[6]
 	bin := filepath.Base(dir)
 	dir = filepath.Dir(dir[:len(dir)-1])
-	dir = filepath.Join(watchDir, box, "out", dir, bin+t)
+	dir = filepath.Join(o.WatchDir, box, "out", dir, bin+t)
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		log.Println("Output Error:", err)
@@ -73,7 +71,7 @@ func watchAndRun(name string) {
 	}
 	defer watcher.Close()
 
-	watching := watchDir + "/" + box + "/in/"
+	watching := o.WatchDir + "/" + box + "/in/"
 	err = filepath.Walk(watching, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

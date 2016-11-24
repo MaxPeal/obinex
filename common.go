@@ -1,5 +1,8 @@
 package obinex
 
+// WatchDir is the directory watched by obinex
+const WatchDir = "/proj/i4invasic/obinex/"
+
 // ControlHosts contains the mapping of buddy hostname to hardware box hostname.
 var ControlHosts map[string]string = map[string]string{
 	"faui49jenkins12": "faui49big01",
