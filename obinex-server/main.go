@@ -82,9 +82,9 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary served\n")
 }
 
-// getOutput handles the serial communication with the hardware.
+// getSerialOutput handles the serial communication with the hardware.
 // The output is sent line by line to the provided channel.
-func getOutput(c chan string) {
+func getSerialOutput(c chan string) {
 	conf := &serial.Config{
 		Name:   "/dev/ttyS0",
 		Baud:   115200,
@@ -165,11 +165,11 @@ func main() {
 		log.Fatal(err)
 	}
 	http.HandleFunc("/"+o.ControlHosts[hostname], binaryServeHandler)
-	http.HandleFunc("/", logHandler)
+	http.HandleFunc("/", weblogHandler)
 	log.Printf("Server: %s serving %s\n", hostname, o.ControlHosts[hostname])
-	http.Handle("/logws", websocket.Handler(logWebsocket))
+	http.Handle("/logws", websocket.Handler(websocketHandler))
 	c := make(chan string, 10)
-	go getOutput(c)
+	go getSerialOutput(c)
 	go handleOutput(c)
 
 	rpc.Register(new(Rpc))

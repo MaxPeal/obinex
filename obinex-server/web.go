@@ -55,8 +55,8 @@ func Broadcast(c chan WebData) chan<- chan WebData {
 	return cNewChans
 }
 
-// logHandler serves the website to view the logfile.
-func logHandler(w http.ResponseWriter, r *http.Request) {
+// weblogHandler serves the website to view the logfile.
+func weblogHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("weblog.html")
 	if err != nil {
 		fmt.Fprint(w, err)
@@ -80,8 +80,8 @@ func logHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// logWebsocket sends log data to the javascript website
-func logWebsocket(ws *websocket.Conn) {
+// websocketHandler sends log data to the javascript website
+func websocketHandler(ws *websocket.Conn) {
 	log.Printf("Web: connection to websocket")
 	// immediately show queue on website
 	websocket.JSON.Send(ws, WebData{Queue: binQueue})
