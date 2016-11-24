@@ -10,6 +10,10 @@ import (
 	"testing"
 )
 
+import (
+	o "gitlab.cs.fau.de/luksen/obinex"
+)
+
 func TestBinaryServeHandler(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -53,4 +57,51 @@ func TestBinaryServeHandler(t *testing.T) {
 	if c := w.Code; c != http.StatusInternalServerError {
 		t.Error("code = %d, want %d", c, http.StatusInternalServerError)
 	}
+}
+
+func TestHandleOutput(t *testing.T) {
+	c := make(chan string)
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-wsChan:
+				break
+			case <-done:
+				return
+			}
+		}
+	}()
+	defer func() { done <- true }()
+
+	// test normal operation
+	binQueue = []string{"foo"}
+	go handleOutput(c)
+	activateOutputChan <- struct{}{}
+	c <- "foo\n"
+	c <- o.EndMarker + "\n"
+	s := <-outputChan
+	if s != "foo\n"+o.EndMarker+"\n" {
+		t.Error("string = %s, want fooGraceful...", s)
+	}
+
+	// test abandoned bin
+	binQueue = []string{} // queue is too short
+	activateOutputChan <- struct{}{}
+	c <- o.EndMarker + "\n"
+	s = <-outputChan
+	if s != o.EndMarker+"\n" {
+		t.Error("string = %s, want %s", s, o.EndMarker)
+	}
+
+	// test late detection
+	binQueue = []string{"foo"}
+	activateOutputChan <- struct{}{}
+	c <- "foo\n"
+	activateOutputChan <- struct{}{}
+	s = <-outputChan
+	if s != "foo\n" {
+		t.Error("string = %s, want foo", s)
+	}
+
 }
