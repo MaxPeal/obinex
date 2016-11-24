@@ -175,5 +175,5 @@ func main() {
 	rpc.Register(new(Rpc))
 	rpc.HandleHTTP()
 
-	http.ListenAndServe(":12334", nil)
+	log.Fatal(http.ListenAndServe(":12334", nil))
 }
