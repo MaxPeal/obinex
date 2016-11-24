@@ -112,6 +112,7 @@ func TestRun(t *testing.T) {
 	err := error(nil)
 
 	go func() { err = rpc.Run(in, &out); done <- true }()
+	defer func() { binQueue = []string{} }()
 	bin := <-binChan
 	outputChan <- "someoutput"
 	<-done
