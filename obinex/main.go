@@ -27,7 +27,7 @@ func run(client *rpc.Client, bin string) string {
 func handleOutput(box, path, s string) {
 	t := time.Now().Format("_2006_01_02_15_04")
 	// Create directories in out
-	dir := strings.SplitN(path, string(filepath.Separator), 7)[6]
+	dir := strings.SplitN(path[len(o.WatchDir):], string(filepath.Separator), 3)[2]
 	bin := filepath.Base(dir)
 	dir = filepath.Dir(dir[:len(dir)-1])
 	dir = filepath.Join(o.WatchDir, box, "out", dir, bin+t)

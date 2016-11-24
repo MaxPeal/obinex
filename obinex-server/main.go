@@ -96,7 +96,9 @@ func handleOutput(c chan string) {
 	runningBin := false
 	endOfBin := func() {
 		log.Printf("Server: end of binary output\n")
-		binQueue = binQueue[1:]
+		if len(binQueue) > 0 {
+			binQueue = binQueue[1:]
+		}
 		wsChan <- WebData{Queue: binQueue}
 		outputChan <- s
 		s = ""
