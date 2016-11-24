@@ -67,7 +67,9 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		f, err = os.Open(bin)
 	}
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
 	}
 	defer f.Close()
 	_, err = io.Copy(w, f)
