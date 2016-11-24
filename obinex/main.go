@@ -79,13 +79,13 @@ func watchAndRun(name string) {
 			return err
 		}
 		if info.IsDir() == false {
-			log.Printf("not a directory: %s\n", path)
+			log.Printf("Watcher: not a directory: %s\n", path)
 			return nil
 		}
 
 		err = watcher.Add(path)
 		if err != nil {
-			log.Println("fsnotify error:", err)
+			log.Println("Watcher: fsnotify error:", err)
 			return nil
 		}
 		log.Println("Watcher: watching " + path)

@@ -54,14 +54,12 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	bin := <-binChan
 	f, err := os.Open(bin)
 	if err != nil {
-		log.Println("Server: ", err)
-		return
+		panic(err)
 	}
 	defer f.Close()
 	_, err = io.Copy(w, f)
 	if err != nil {
-		log.Println("Server: ", err)
-		return
+		panic(err)
 	}
 	log.Printf("Server: binary served\n")
 }
