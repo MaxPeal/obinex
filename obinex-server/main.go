@@ -8,6 +8,7 @@ import (
 	"net/rpc"
 	"os"
 	"strings"
+	"time"
 )
 
 import (
@@ -53,6 +54,18 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	activateOutputChan <- struct{}{}
 	bin := <-binChan
 	f, err := os.Open(bin)
+	// Sometimes there is a delay before we can access the file via NFS, so
+	// we wait up to a second before erroring out.
+	i := 10
+	for os.IsNotExist(err) {
+		i -= 1
+		if i == -1 {
+			break
+		}
+		log.Printf("Server: no such file, waiting...\n")
+		time.Sleep(100 * time.Millisecond)
+		f, err = os.Open(bin)
+	}
 	if err != nil {
 		panic(err)
 	}
