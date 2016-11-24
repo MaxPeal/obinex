@@ -97,4 +97,35 @@ func TestHandleOutput(t *testing.T) {
 	c <- o.EndMarker + "\n"
 	<-outputChan
 }
+
+func TestRun(t *testing.T) {
+	// make sure test can be run on any server
+	oldHosts := o.ControlHosts
+	hostname, _ := os.Hostname()
+	o.ControlHosts = map[string]string{hostname: "somebox"}
+	defer func() { o.ControlHosts = oldHosts }()
+
+	rpc := Rpc{}
+	in := o.WatchDir + "somebox/in/somedir/somebin"
+	out := ""
+	done := make(chan bool)
+	err := error(nil)
+
+	go func() { err = rpc.Run(in, &out); done <- true }()
+	bin := <-binChan
+	outputChan <- "someoutput"
+	<-done
+
+	if bin != o.WatchDir+"somebox/in/somedir/somebin" {
+		t.Errorf("bin = %s, want somebin", o.WatchDir+"somebox/in/somedir/somebin")
+	}
+	if err != nil {
+		t.Errorf("error = %s, want nil", err)
+	}
+	if out != "someoutput" {
+		t.Errorf("out = %s, want someoutput", out)
+	}
+	if binQueue[0] != "somedir/somebin" {
+		t.Errorf("binQueue = %v, want somedir/somebin", binQueue)
+	}
 }
