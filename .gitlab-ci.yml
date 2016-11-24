@@ -1,0 +1,15 @@
+before_script:
+    - git submodule init
+    - git submodule update
+    - cd ..
+    - rm -rf src/gitlab.cs.fau.de/luksen/
+    - mkdir -p src/gitlab.cs.fau.de/luksen/
+    - cp -r obinex src/gitlab.cs.fau.de/luksen/
+
+build:
+    script:
+        - GOPATH=$PWD:$GOPATH go build gitlab.cs.fau.de/luksen/obinex/...
+
+test:
+    script:
+        - GOPATH=$PWD:$GOPATH go test gitlab.cs.fau.de/luksen/obinex/...
