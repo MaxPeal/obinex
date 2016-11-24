@@ -12,6 +12,7 @@ import (
 
 import (
 	o "gitlab.cs.fau.de/luksen/obinex"
+	"golang.org/x/net/websocket"
 )
 
 func TestBinaryServeHandler(t *testing.T) {
@@ -128,5 +129,39 @@ func TestRun(t *testing.T) {
 	}
 	if binQueue[0] != "somedir/somebin" {
 		t.Errorf("binQueue = %v, want somedir/somebin", binQueue)
+	}
+}
+
+func TestWebsocket(t *testing.T) {
+	server := httptest.NewServer(websocket.Handler(websocketHandler))
+	defer server.Close()
+
+	conn1, err := websocket.Dial("ws://"+server.URL[7:], "", "http://localhost")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn1.Close()
+	conn2, err := websocket.Dial("ws://"+server.URL[7:], "", "http://localhost")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn2.Close()
+
+	wsChan <- WebData{}
+
+	var buf = make([]byte, 512)
+	var n int
+	if n, err = conn1.Read(buf); err != nil {
+		log.Fatal(err)
+	}
+	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[]}" {
+		t.Errorf("output = %s, want empty WebData", string(buf[:n]))
+	}
+
+	if n, err = conn2.Read(buf); err != nil {
+		log.Fatal(err)
+	}
+	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[]}" {
+		t.Errorf("output = %s, want empty WebData", string(buf[:n]))
 	}
 }
