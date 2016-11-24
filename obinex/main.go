@@ -72,11 +72,14 @@ func watchAndRun(name string) {
 	defer watcher.Close()
 
 	watching := o.WatchDir + "/" + box + "/in/"
+	os.MkdirAll(watching, 0755)
 	err = filepath.Walk(watching, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			log.Println(err)
 			return err
 		}
 		if info.IsDir() == false {
+			log.Printf("not a directory: %s\n", path)
 			return nil
 		}
 
