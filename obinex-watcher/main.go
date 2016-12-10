@@ -2,26 +2,22 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/rpc"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
-)
-
-import (
-	o "gitlab.cs.fau.de/luksen/obinex"
 
 	"github.com/fsnotify/fsnotify"
+	o "gitlab.cs.fau.de/luksen/obinex"
 )
 
-func run(client *rpc.Client, bin string) string {
+func run(client *rpc.Client, bin string) (string, error) {
 	var res string
 	err := client.Call("Rpc.Run", bin, &res)
-	if err != nil {
-		log.Fatal("RPC Error:", err)
-	}
-	return res
+	return res, err
 }
 
 func handleOutput(box, path, s string) {
@@ -54,20 +50,42 @@ func handleOutput(box, path, s string) {
 	f.WriteString(s)
 }
 
-func watchAndRun(name string) {
+func isConnRefused(err error) bool {
+	if err, ok := err.(*net.OpError); ok {
+		if err, ok := err.Err.(*os.SyscallError); ok {
+			if err.Err == syscall.ECONNREFUSED {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func retryWatchAndRun(name string, done chan bool) {
+	defer func() { done <- true }()
+	err := watchAndRun(name)
+	for isConnRefused(err) {
+		time.Sleep(1 * time.Second)
+		err = watchAndRun(name)
+	}
+	log.Printf("watchAndRun [%s]: %s", name, err)
+	return
+}
+
+func watchAndRun(name string) error {
 	box := o.ControlHosts[name]
 
 	client, err := rpc.DialHTTP("tcp", name+":12334")
 	if err != nil {
-		log.Println("dialing:", err)
-		return
+		return err
 	}
 	defer client.Close()
+	log.Printf("RPC: %s connected\n", name)
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 	defer watcher.Close()
 
@@ -92,6 +110,7 @@ func watchAndRun(name string) {
 		return nil
 	})
 
+	shutdown := make(chan error)
 	for {
 		select {
 		case event := <-watcher.Events:
@@ -111,24 +130,29 @@ func watchAndRun(name string) {
 				}
 				log.Println("Watcher: running", event.Name)
 				go func() {
-					s := run(client, event.Name)
+					s, err := run(client, event.Name)
+					if err != nil {
+						shutdown <- err
+					}
 					handleOutput(box, event.Name, s)
 				}()
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
+		case err := <-shutdown:
+			return err
 		}
 	}
 }
 
 func main() {
-	//hostname, err := os.Hostname()
-	//if err != nil {
-	//log.Fatal(err)
-	//}
-	// add other hosts here for 1 to N paradigm
-	watchAndRun("faui49jenkins12")
-	watchAndRun("faui49jenkins13")
-	watchAndRun("faui49jenkins14")
-	watchAndRun("faui49jenkins15")
+	done := make(chan bool)
+	go retryWatchAndRun("faui49jenkins12", done)
+	go retryWatchAndRun("faui49jenkins13", done)
+	go retryWatchAndRun("faui49jenkins14", done)
+	go retryWatchAndRun("faui49jenkins15", done)
+	<-done
+	<-done
+	<-done
+	<-done
 }
