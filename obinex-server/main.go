@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"io"
 	"log"
 	"net/http"
@@ -9,10 +10,9 @@ import (
 	"os"
 	"strings"
 	"time"
-)
 
-import (
 	"github.com/tarm/serial"
+
 	o "gitlab.cs.fau.de/luksen/obinex"
 	"golang.org/x/net/websocket"
 )
@@ -86,7 +86,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 // The output is sent line by line to the provided channel.
 func getSerialOutput(c chan string) {
 	conf := &serial.Config{
-		Name:   "/dev/ttyS0",
+		Name:   SerialPath,
 		Baud:   115200,
 		Parity: serial.ParityNone,
 		Size:   8,
@@ -151,6 +151,7 @@ func handleOutput(c chan string) {
 }
 
 func main() {
+	flag.Parse()
 	// log to stdout and a file
 	f, err := os.Create("obinex.log")
 	if err != nil {

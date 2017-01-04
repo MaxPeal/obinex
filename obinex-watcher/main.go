@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net"
 	"net/rpc"
@@ -23,10 +24,10 @@ func run(client *rpc.Client, bin string) (string, error) {
 func handleOutput(box, path, s string) {
 	t := time.Now().Format("_2006_01_02_15_04")
 	// Create directories in out
-	dir := strings.SplitN(path[len(o.WatchDir):], string(filepath.Separator), 3)[2]
+	dir := strings.SplitN(path[len(WatchDir):], string(filepath.Separator), 3)[2]
 	bin := filepath.Base(dir)
 	dir = filepath.Dir(dir[:len(dir)-1])
-	dir = filepath.Join(o.WatchDir, box, "out", dir, bin+t)
+	dir = filepath.Join(WatchDir, box, "out", dir, bin+t)
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		log.Println("Output Error:", err)
@@ -89,7 +90,7 @@ func watchAndRun(name string) error {
 	}
 	defer watcher.Close()
 
-	watching := o.WatchDir + "/" + box + "/in/"
+	watching := WatchDir + "/" + box + "/in/"
 	os.MkdirAll(watching, 0755)
 	err = filepath.Walk(watching, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -146,6 +147,7 @@ func watchAndRun(name string) error {
 }
 
 func main() {
+	flag.Parse()
 	done := make(chan bool)
 	go retryWatchAndRun("faui49jenkins12", done)
 	go retryWatchAndRun("faui49jenkins13", done)
