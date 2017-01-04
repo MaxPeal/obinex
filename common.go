@@ -25,6 +25,15 @@ var ControlHosts map[string]string = map[string]string{
 	"faui49jenkins21": "faui49jenkins25",
 }
 
+// Servers lists the servers connected to by default
+var Servers = []string{
+	"faui49jenkins12",
+	"faui49jenkins13",
+	"faui49jenkins14",
+	"faui49jenkins15",
+	"faui49jenkins21",
+}
+
 // BoxByHost returns the hardware box corresponding to a specific host
 func BoxByHost(hostname string) (box string) {
 	box, ok := ControlHosts[hostname]

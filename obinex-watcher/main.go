@@ -149,12 +149,10 @@ func watchAndRun(name string) error {
 func main() {
 	flag.Parse()
 	done := make(chan bool)
-	go retryWatchAndRun("faui49jenkins12", done)
-	go retryWatchAndRun("faui49jenkins13", done)
-	go retryWatchAndRun("faui49jenkins14", done)
-	go retryWatchAndRun("faui49jenkins15", done)
-	<-done
-	<-done
-	<-done
-	<-done
+	for _, server := range Servers {
+		go retryWatchAndRun(server, done)
+	}
+	for range Servers {
+		<-done
+	}
 }
