@@ -29,7 +29,7 @@ func check(err error) bool {
 	return false
 }
 
-func main() {
+func Run() {
 	w, tty, err := pty.Open()
 	check(err)
 	defer w.Close()
@@ -49,4 +49,8 @@ func main() {
 		io.WriteString(w, "executing\n")
 		io.WriteString(w, "Graceful shutdown initiated\n")
 	}
+}
+
+func main() {
+	Run()
 }
