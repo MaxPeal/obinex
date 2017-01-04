@@ -38,12 +38,8 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(path string, reply *string) error {
 	log.Printf("RPC: binary request: %s\n", path)
-	var boxname string
-	hostname, err := os.Hostname()
-	if err == nil {
-		boxname = o.ControlHosts[hostname]
-	}
-	binQueue = append(binQueue, path[len(o.WatchDir)+len(boxname)+4:])
+	boxname := o.CurrentBox()
+	binQueue = append(binQueue, path[len(WatchDir)+len(boxname)+4:])
 	wsChan <- WebData{Queue: binQueue}
 	binChan <- path
 	*reply = <-outputChan
@@ -165,9 +161,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.HandleFunc("/"+o.ControlHosts[hostname], binaryServeHandler)
+	box := o.BoxByHost(hostname)
+	http.HandleFunc("/"+box, binaryServeHandler)
 	http.HandleFunc("/", weblogHandler)
-	log.Printf("Server: %s serving %s\n", hostname, o.ControlHosts[hostname])
+	log.Printf("Server: %s serving %s\n", hostname, box)
 	http.Handle("/logws", websocket.Handler(websocketHandler))
 	c := make(chan string, 10)
 	go getSerialOutput(c)
