@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -51,10 +52,14 @@ func handleOutput(box, path, s string) {
 	f.WriteString(s)
 }
 
-func isConnRefused(err error) bool {
+func shouldRetry(err error) bool {
+	if err.Error() == "connection is shut down" {
+		return true
+	}
 	if err, ok := err.(*net.OpError); ok {
+		fmt.Println("foo")
 		if err, ok := err.Err.(*os.SyscallError); ok {
-			if err.Err == syscall.ECONNREFUSED {
+			if err.Err == syscall.ECONNREFUSED || err.Err == syscall.ESHUTDOWN {
 				return true
 			}
 		}
@@ -65,7 +70,7 @@ func isConnRefused(err error) bool {
 func retryWatchAndRun(name string, done chan bool) {
 	defer func() { done <- true }()
 	err := watchAndRun(name)
-	for isConnRefused(err) {
+	for shouldRetry(err) {
 		time.Sleep(1 * time.Second)
 		err = watchAndRun(name)
 	}
@@ -134,6 +139,7 @@ func watchAndRun(name string) error {
 					s, err := run(client, event.Name)
 					if err != nil {
 						shutdown <- err
+						return
 					}
 					handleOutput(box, event.Name, s)
 				}()
