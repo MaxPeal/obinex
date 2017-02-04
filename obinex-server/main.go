@@ -173,5 +173,17 @@ func main() {
 	rpc.Register(new(Rpc))
 	rpc.HandleHTTP()
 
-	log.Fatal(http.ListenAndServe(":12334", nil))
+	server := &http.Server{
+		Addr: ":12334",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			addr := req.RemoteAddr
+			if !(strings.HasPrefix(addr, "[::1]") || strings.HasPrefix(addr, "127.0.0.1") || strings.HasPrefix(addr, "131.188.42.")) {
+				http.Error(w, "Blocked", 401)
+				log.Printf("Blocked access from %s\n", addr)
+				return
+			}
+			http.DefaultServeMux.ServeHTTP(w, req)
+		}),
+	}
+	log.Fatal(server.ListenAndServe())
 }
