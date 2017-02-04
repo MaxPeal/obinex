@@ -7,6 +7,7 @@ before_script:
     - cp -r obinex src/gitlab.cs.fau.de/luksen/
     - export GOPATH=$PWD
     - go get golang.org/x/net/websocket
+    - go get golang.org/x/sys/unix
 
 build:
     script:
