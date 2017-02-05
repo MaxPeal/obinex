@@ -8,6 +8,7 @@ before_script:
     - export GOPATH=$PWD
     - go get golang.org/x/net/websocket
     - go get golang.org/x/sys/unix
+    - apt-get install bats
 
 build:
     script:
@@ -16,6 +17,7 @@ build:
 test:
     script:
         - go test gitlab.cs.fau.de/luksen/obinex/...
+        - bats src/gitlab.cs.fau.de/luksen/obinex/integration_tests
 
 coverage:
     script:
