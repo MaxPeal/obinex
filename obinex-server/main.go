@@ -153,7 +153,7 @@ func main() {
 	if err != nil {
 		log.Print("no log file:", err)
 	} else {
-		mw := io.MultiWriter(os.Stdout, f)
+		mw := io.MultiWriter(os.Stderr, f)
 		log.SetOutput(mw)
 	}
 
@@ -164,7 +164,6 @@ func main() {
 	box := o.BoxByHost(hostname)
 	http.HandleFunc("/"+box, binaryServeHandler)
 	http.HandleFunc("/", weblogHandler)
-	log.Printf("Server: %s serving %s\n", hostname, box)
 	http.Handle("/logws", websocket.Handler(websocketHandler))
 	c := make(chan string, 10)
 	go getSerialOutput(c)
@@ -185,5 +184,6 @@ func main() {
 			http.DefaultServeMux.ServeHTTP(w, req)
 		}),
 	}
+	log.Printf("Server: %s serving %s\n", hostname, box)
 	log.Fatal(server.ListenAndServe())
 }
