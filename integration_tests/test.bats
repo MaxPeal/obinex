@@ -4,7 +4,7 @@ setup()  {
 	serialpath=$( grep -o '/dev/pts/[0-9]\+' out_mock )
 	obinex-server -watchdir . -serialpath $serialpath 2> out_server &
 	obinex-watcher -watchdir . -servers localhost 2> out_watcher &
-	sleep 2
+	sleep 3
 }
 
 @test "startup only" {
@@ -18,6 +18,7 @@ setup()  {
 
 @test "execution output" {
 	echo "somecontent" > mock/in/foo
+	sleep 0.5
 
 	grep "RPC: binary request: mock/in/foo" out_server
 	grep "Server: binary served" out_server
@@ -30,7 +31,6 @@ setup()  {
 
 @test "execution files" {
 	echo "somecontent" > mock/in/foo
-
 	sleep 0.5
 
 	[ "x$( cat mock/out/foo*/foo )" == "xsomecontent" ]
