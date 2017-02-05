@@ -1,10 +1,10 @@
 setup()  {
 	obinex-hwmock 2> out_mock &
+	sleep 1
 	serialpath=$( grep -o '/dev/pts/[0-9]\+' out_mock )
 	obinex-server -watchdir . -serialpath $serialpath 2> out_server &
 	obinex-watcher -watchdir . -servers localhost 2> out_watcher &
-
-	sleep 1
+	sleep 2
 }
 
 @test "startup only" {
