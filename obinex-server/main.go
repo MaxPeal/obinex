@@ -98,6 +98,11 @@ func getSerialOutput(c chan string) {
 		var line string
 		line, err = r.ReadString('\n')
 		c <- line
+		select {
+		case <-testDone:
+			log.Println("Test: exiting getSerialOutput")
+			return
+		}
 	}
 	if err != nil {
 		log.Fatal(err)

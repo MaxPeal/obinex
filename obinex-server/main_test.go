@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -8,9 +9,9 @@ import (
 	"os"
 	"strings"
 	"testing"
-)
 
-import (
+	"github.com/kr/pty"
+
 	o "gitlab.cs.fau.de/luksen/obinex"
 	"golang.org/x/net/websocket"
 )
@@ -57,6 +58,25 @@ func TestBinaryServeHandler(t *testing.T) {
 
 	if c := w.Code; c != http.StatusInternalServerError {
 		t.Errorf("code = %d, want %d", c, http.StatusInternalServerError)
+	}
+}
+
+func TestGetSerialOutput(t *testing.T) {
+	w, tty, err := pty.Open()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer w.Close()
+	defer tty.Close()
+	SerialPath = tty.Name()
+
+	c := make(chan string)
+	go getSerialOutput(c)
+	defer func() { testDone <- true }()
+
+	io.WriteString(w, "foobar\n")
+	if s := <-c; s != "foobar\n" {
+		t.Errorf("channel = %s, want foobar", s)
 	}
 }
 
