@@ -16,6 +16,7 @@ build:
 test:
     script:
         - go test gitlab.cs.fau.de/luksen/obinex/...
+        - go install gitlab.cs.fau.de/luksen/obinex/...
         - bats src/gitlab.cs.fau.de/luksen/obinex/integration_tests
 
 coverage:
