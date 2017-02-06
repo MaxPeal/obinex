@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -114,6 +116,8 @@ func watchAndRun(name string) error {
 		return nil
 	})
 
+	killChan := make(chan os.Signal, 1)
+	signal.Notify(killChan, syscall.SIGTERM)
 	shutdown := make(chan error)
 	for {
 		select {
@@ -146,6 +150,8 @@ func watchAndRun(name string) error {
 			log.Println("fsnotify error:", err)
 		case err := <-shutdown:
 			return err
+		case <-killChan:
+			return errors.New("Terminated by signal.")
 		}
 	}
 }

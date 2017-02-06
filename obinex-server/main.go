@@ -12,9 +12,10 @@ import (
 	"time"
 
 	"github.com/tarm/serial"
+	"github.com/tylerb/graceful"
+	"golang.org/x/net/websocket"
 
 	o "gitlab.cs.fau.de/luksen/obinex"
-	"golang.org/x/net/websocket"
 )
 
 // testDone is used by the testsuite
@@ -102,10 +103,12 @@ func getSerialOutput(c chan string) {
 		case <-testDone:
 			log.Println("Test: exiting getSerialOutput")
 			return
+		default:
+			break
 		}
 	}
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Getting serial output: ", err)
 	}
 }
 
@@ -190,5 +193,5 @@ func main() {
 		}),
 	}
 	log.Printf("Server: %s serving %s\n", hostname, box)
-	log.Fatal(server.ListenAndServe())
+	log.Println(graceful.ListenAndServe(server, 10*time.Second))
 }
