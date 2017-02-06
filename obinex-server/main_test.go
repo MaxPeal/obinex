@@ -74,12 +74,14 @@ func TestGetSerialOutput(t *testing.T) {
 
 	c := make(chan string)
 	go getSerialOutput(c)
-	defer func() { testDone <- true }()
 
 	io.WriteString(w, "foobar\n")
 	if s := <-c; s != "foobar\n" {
 		t.Errorf("channel = %s, want foobar", s)
 	}
+	testDone <- true
+	io.WriteString(w, "hanging read\n")
+	<-c
 }
 
 func TestHandleOutput(t *testing.T) {

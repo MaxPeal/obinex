@@ -19,7 +19,7 @@ import (
 )
 
 // testDone is used by the testsuite
-var testDone = make(chan bool)
+var testDone = make(chan bool, 1)
 
 // binQueue lists all queued binaries.
 // This is non-functional purely for logging etc.
