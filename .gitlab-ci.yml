@@ -6,6 +6,7 @@ before_script:
     - mkdir -p src/gitlab.cs.fau.de/luksen/
     - cp -r obinex src/gitlab.cs.fau.de/luksen/
     - export GOPATH=$PWD
+    - export PATH=$GOPATH/bin:$PATH
     - go get golang.org/x/net/websocket
     - go get golang.org/x/sys/unix
     - go get github.com/tylerb/graceful
