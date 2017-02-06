@@ -7,3 +7,6 @@
 [submodule "vendor/github.com/kr/pty"]
 	path = vendor/github.com/kr/pty
 	url = http://github.com/kr/pty.git
+[submodule "vendor/github.com/tylerb/graceful"]
+	path = vendor/github.com/tylerb/graceful
+	url = http://github.com/tylerb/graceful
