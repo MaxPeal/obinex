@@ -20,7 +20,8 @@ build:
 test:
     script:
         - go test gitlab.cs.fau.de/luksen/obinex/...
-        - integration_tests/run.sh integration_tests
+        - cd integration_tests
+        - run.sh .
 
 coverage:
     script:
