@@ -1,9 +1,9 @@
 setup()  {
-	obinex-hwmock 2> out_mock &
+	./obinex-hwmock 2> out_mock &
 	sleep 0.5
 	serialpath=$( grep -o '/dev/pts/[0-9]\+' out_mock )
-	obinex-server -watchdir . -serialpath $serialpath 2> out_server &
-	obinex-watcher -watchdir . -servers localhost 2> out_watcher &
+	./obinex-server -watchdir . -serialpath $serialpath -test.coverprofile server_$BATS_TEST_NAME.cov 2> out_server &
+	./obinex-watcher -watchdir . -servers localhost -test.coverprofile watcher_$BATS_TEST_NAME.cov 2> out_watcher &
 	sleep 2
 }
 
@@ -24,7 +24,6 @@ setup()  {
 	grep "Server: binary served" out_server
 	grep "Output: executing" out_server
 	grep "Output: Graceful shutdown initiated" out_server
-	echo $( sed -n '$s/.* ..:..:.. //p' out_server )
 
 	grep "Watcher: running mock/in/foo" out_watcher
 }

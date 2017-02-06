@@ -8,6 +8,9 @@ before_script:
     - export GOPATH=$PWD
     - go get golang.org/x/net/websocket
     - go get golang.org/x/sys/unix
+    - go get github.com/wadey/gocovmerge
+    - go install github.com/wadey/gocovmerge
+    - cd src/gitlab.cs.fau.de/luksen/obinex
 
 build:
     script:
@@ -16,12 +19,10 @@ build:
 test:
     script:
         - go test gitlab.cs.fau.de/luksen/obinex/...
-        - go install gitlab.cs.fau.de/luksen/obinex/...
-        - bats src/gitlab.cs.fau.de/luksen/obinex/integration_tests
+        - integration_tests/run.sh integration_tests
 
 coverage:
     script:
-        - cd src/gitlab.cs.fau.de/luksen/obinex
         - ./coverage.sh
         - mv coverage_*.html ../../../../obinex/
     artifacts:
