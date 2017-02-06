@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -57,7 +56,6 @@ func shouldRetry(err error) bool {
 		return true
 	}
 	if err, ok := err.(*net.OpError); ok {
-		fmt.Println("foo")
 		if err, ok := err.Err.(*os.SyscallError); ok {
 			if err.Err == syscall.ECONNREFUSED || err.Err == syscall.ESHUTDOWN {
 				return true
