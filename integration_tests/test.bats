@@ -13,19 +13,19 @@ setup()  {
 	grep "start of binary output" out_server
 
 	grep "RPC: localhost connected" out_watcher
-	grep "Watcher: watching ./mock/in/" out_watcher
+	grep "Watcher: watching mock/in" out_watcher
 }
 
 @test "execution output" {
 	echo "somecontent" > mock/in/foo
 	sleep 0.5
 
-	grep "RPC: binary request: mock/in/foo" out_server
+	grep "RPC: binary request: mock/executing/foo_.*/foo" out_server
 	grep "Server: binary served" out_server
 	grep "Output: executing" out_server
 	grep "Output: Graceful shutdown initiated" out_server
 
-	grep "Watcher: running mock/in/foo" out_watcher
+	grep "Watcher: queueing mock/in/foo" out_watcher
 }
 
 @test "execution files" {
