@@ -28,7 +28,7 @@ setup()  {
 	grep "Watcher: queueing mock/in/foo" out_watcher
 }
 
-@test "execution files" {
+@test "execution filecontent" {
 	echo "somecontent" > mock/in/foo
 	sleep 0.5
 
@@ -37,6 +37,15 @@ setup()  {
 executing
 executing
 Graceful shutdown initiated")
+}
+
+@test "execution directories" {
+	touch mock/in/foo
+	sleep 0.5
+
+	ls mock/queued
+	ls mock/executing
+	ls mock/out
 }
 
 teardown() {
