@@ -21,6 +21,7 @@ type Buddy struct {
 	Boxname    string
 	Servername string
 	InDir      string
+	Lock       Lock
 	queue      chan string
 	rpc        *rpc.Client
 }
@@ -124,6 +125,7 @@ func retryWatchAndRun(buddy *Buddy, done chan bool) {
 	defer func() { done <- true }()
 	err := watchAndRun(buddy)
 	for shouldRetry(err) {
+		log.Println("Connection error, retrying...")
 		time.Sleep(1 * time.Second)
 		err = watchAndRun(buddy)
 	}
@@ -170,6 +172,11 @@ func watchAndRun(buddy *Buddy) error {
 			log.Println("Watcher:", err)
 			return err
 		}
+		if path == buddy.Lock.Path {
+			log.Println("locked")
+			err := buddy.Lock.Set()
+			return err
+		}
 		if info.IsDir() == false {
 			log.Printf("Watcher: not a directory: %s\n", path)
 			return nil
@@ -183,6 +190,9 @@ func watchAndRun(buddy *Buddy) error {
 		log.Println("Watcher: watching " + path)
 		return nil
 	})
+	if err != nil {
+		log.Println(err)
+	}
 
 	killChan := make(chan os.Signal, 1)
 	signal.Notify(killChan, syscall.SIGTERM)
@@ -203,6 +213,15 @@ func watchAndRun(buddy *Buddy) error {
 					log.Println("Watcher: watching " + event.Name)
 					break
 				}
+				if event.Name == buddy.Lock.Path {
+					log.Println("locked")
+					err = buddy.Lock.Set()
+					if err != nil {
+						log.Println("lock error:", err)
+					}
+					break
+				}
+				log.Println(info.Name())
 				log.Println("Watcher: queueing", event.Name)
 				path := toQueued(event.Name)
 				buddy.queue <- path
@@ -225,11 +244,15 @@ func main() {
 	done := make(chan bool)
 	for _, server := range Servers {
 		box := o.ControlHosts[server]
+		inDir := filepath.Join(WatchDir, box, "in")
 		buddy := &Buddy{
 			Servername: server,
 			Boxname:    box,
-			InDir:      filepath.Join(WatchDir, box, "in"),
-			queue:      make(chan string),
+			InDir:      inDir,
+			Lock: Lock{
+				set:  false,
+				Path: filepath.Join(inDir, "lock")},
+			queue: make(chan string),
 		}
 		buddy.Connect()
 
