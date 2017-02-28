@@ -17,6 +17,29 @@ import (
 	o "gitlab.cs.fau.de/luksen/obinex"
 )
 
+type Buddy struct {
+	Boxname    string
+	Servername string
+	InDir      string
+	queue      chan string
+	rpc        *rpc.Client
+}
+
+func (b *Buddy) Connect() error {
+	log.Println("RPC: connecting to", b.Servername)
+	client, err := rpc.DialHTTP("tcp", b.Servername+":12334")
+	if err != nil {
+		return err
+	}
+	b.rpc = client
+	log.Printf("RPC: %s connected\n", b.Servername)
+	return nil
+}
+
+func (b *Buddy) Close() {
+	b.rpc.Close()
+}
+
 func run(client *rpc.Client, bin string) (string, error) {
 	var res string
 	err := client.Call("Rpc.Run", bin, &res)
@@ -97,35 +120,27 @@ func shouldRetry(err error) bool {
 	return false
 }
 
-func retryWatchAndRun(name string, queue chan string, done chan bool) {
+func retryWatchAndRun(buddy *Buddy, done chan bool) {
 	defer func() { done <- true }()
-	err := watchAndRun(name, queue)
+	err := watchAndRun(buddy)
 	for shouldRetry(err) {
 		time.Sleep(1 * time.Second)
-		err = watchAndRun(name, queue)
+		err = watchAndRun(buddy)
 	}
-	log.Printf("watchAndRun [%s]: %s", name, err)
+	log.Printf("watchAndRun [%s]: %s", buddy.Servername, err)
 	return
 }
 
-func watchAndRun(name string, queue chan string) error {
-	box := o.ControlHosts[name]
-
-	log.Println("RPC: connecting to", name)
-	client, err := rpc.DialHTTP("tcp", name+":12334")
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-	log.Printf("RPC: %s connected\n", name)
-
-	// Send the queued binaries to the server one after another
+func watchAndRun(buddy *Buddy) error {
+	// Send the buddy.queued binaries to the server one after another
+	// This function is currently located here because of the shutdown
+	// channel.
 	shutdown := make(chan error)
 	go func(client *rpc.Client, queue chan string) {
-		for bin := range queue {
+		for bin := range buddy.queue {
 			bin = toExecuting(bin)
 			log.Println(bin)
-			output, err := run(client, bin)
+			output, err := run(buddy.rpc, bin)
 			if err != nil {
 				shutdown <- err
 				return
@@ -140,7 +155,7 @@ func watchAndRun(name string, queue chan string) error {
 			f.Close()
 			toOut(bin)
 		}
-	}(client, queue)
+	}(buddy.rpc, buddy.queue)
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -149,9 +164,8 @@ func watchAndRun(name string, queue chan string) error {
 	}
 	defer watcher.Close()
 
-	watching := filepath.Join(WatchDir, box, "in")
-	os.MkdirAll(watching, 0755)
-	err = filepath.Walk(watching, func(path string, info os.FileInfo, err error) error {
+	os.MkdirAll(buddy.InDir, 0755)
+	err = filepath.Walk(buddy.InDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Println("Watcher:", err)
 			return err
@@ -191,7 +205,7 @@ func watchAndRun(name string, queue chan string) error {
 				}
 				log.Println("Watcher: queueing", event.Name)
 				path := toQueued(event.Name)
-				queue <- path
+				buddy.queue <- path
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
@@ -210,8 +224,16 @@ func main() {
 	}
 	done := make(chan bool)
 	for _, server := range Servers {
-		queue := make(chan string)
-		go retryWatchAndRun(server, queue, done)
+		box := o.ControlHosts[server]
+		buddy := &Buddy{
+			Servername: server,
+			Boxname:    box,
+			InDir:      filepath.Join(WatchDir, box, "in"),
+			queue:      make(chan string),
+		}
+		buddy.Connect()
+
+		go retryWatchAndRun(buddy, done)
 	}
 	for range Servers {
 		<-done
