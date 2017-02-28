@@ -22,7 +22,7 @@ test:
     script:
         - go test gitlab.cs.fau.de/luksen/obinex/...
         - cd integration_tests
-        - ./run.sh .
+        - ./run.sh
 
 coverage:
     script:

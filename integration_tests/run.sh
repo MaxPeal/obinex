@@ -20,5 +20,5 @@ function global_teardown() {
 
 
 global_setup
-bats "$@"
+bats .
 global_teardown
