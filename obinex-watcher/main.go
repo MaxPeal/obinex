@@ -189,7 +189,7 @@ func watchAndRun(buddy *Buddy) error {
 	for {
 		select {
 		case event := <-watcher.Events:
-			if event.Op&fsnotify.Create == fsnotify.Create {
+			if event.Op&fsnotify.Write == fsnotify.Write {
 				info, err := os.Stat(event.Name)
 				if err != nil {
 					log.Println("Watcher:", err)

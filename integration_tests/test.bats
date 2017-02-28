@@ -40,7 +40,7 @@ Graceful shutdown initiated")
 }
 
 @test "execution directories" {
-	touch mock/in/foo
+	echo "somecontent" > mock/in/foo
 	sleep 0.5
 
 	ls mock/queued
