@@ -25,6 +25,14 @@ var ControlHosts map[string]string = map[string]string{
 	"faui49jenkins21": "faui49jenkins25",
 }
 
+var HostByBox map[string]string = make(map[string]string)
+
+func init() {
+	for host, box := range ControlHosts {
+		HostByBox[box] = host
+	}
+}
+
 // Servers lists the servers connected to by default
 var Servers = []string{
 	"faui49jenkins12",
