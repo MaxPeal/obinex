@@ -28,7 +28,7 @@ type Lock struct {
 
 func (l Lock) Get(bin string) bool {
 	if !l.set {
-		return false
+		return true
 	}
 	uid, err := getUid(bin)
 	if err != nil {
@@ -38,7 +38,7 @@ func (l Lock) Get(bin string) bool {
 	return l.uid == uid
 }
 
-func (l Lock) Set() error {
+func (l *Lock) Set() error {
 	uid, err := getUid(l.Path)
 	if err != nil {
 		return err
@@ -64,6 +64,8 @@ func (l Lock) Set() error {
 		<-c
 		l.set = false
 		os.Remove(l.Path)
+		log.Println("Lock: unlocked")
 	}()
+	log.Println("Lock: locked")
 	return nil
 }

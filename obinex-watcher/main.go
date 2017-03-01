@@ -173,7 +173,6 @@ func watchAndRun(buddy *Buddy) error {
 			return err
 		}
 		if path == buddy.Lock.Path {
-			log.Println("locked")
 			err := buddy.Lock.Set()
 			return err
 		}
@@ -215,23 +214,20 @@ func watchAndRun(buddy *Buddy) error {
 				}
 			}
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				info, err := os.Stat(event.Name)
-				if err != nil {
-					log.Println("Watcher:", err)
-					break
-				}
 				if event.Name == buddy.Lock.Path {
-					log.Println("locked")
 					err = buddy.Lock.Set()
 					if err != nil {
 						log.Println("lock error:", err)
 					}
 					break
 				}
-				log.Println(info.Name())
-				log.Println("Watcher: queueing", event.Name)
-				path := toQueued(event.Name)
-				buddy.queue <- path
+				if buddy.Lock.Get(event.Name) {
+					log.Println("Watcher: queueing", event.Name)
+					path := toQueued(event.Name)
+					buddy.queue <- path
+				} else {
+					log.Println("Watcher: blocked", event.Name)
+				}
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
