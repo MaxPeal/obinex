@@ -1,10 +1,9 @@
 #!/bin/bash
 
 mode=set
-#packages=(obinex obinex-server obinex-tool)
-packages=(obinex-server)
+packages=(obinex-server obinex-watcher)
 
-for dir in $packages
+for dir in ${packages[*]}
 do
 	echo -------------------------
 	echo " $dir"
