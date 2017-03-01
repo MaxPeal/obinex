@@ -60,7 +60,7 @@ func (l *Lock) Set() error {
 	l.Expires = date
 	l.set = true
 	go func() {
-		c := time.After(time.Until(l.Expires))
+		c := time.After(l.Expires.Sub(time.Now))
 		<-c
 		l.set = false
 		os.Remove(l.Path)
