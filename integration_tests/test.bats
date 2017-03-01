@@ -48,6 +48,18 @@ Graceful shutdown initiated")
 	ls mock/out
 }
 
+@test "subdirectories" {
+	mkdir mock/in/sub
+
+	grep "Watcher: watching mock/in/sub" out_watcher
+
+	echo "somecontent" > mock/in/sub/foo
+
+	ls mock/queued/sub/
+	ls mock/executing/sub/
+	ls mock/out/sub/
+}
+
 teardown() {
 	kill $(jobs -p) >/dev/null
 	rm -r mock

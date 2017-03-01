@@ -199,7 +199,7 @@ func watchAndRun(buddy *Buddy) error {
 	for {
 		select {
 		case event := <-watcher.Events:
-			if event.Op&fsnotify.Write == fsnotify.Write {
+			if event.Op&fsnotify.Create == fsnotify.Create {
 				info, err := os.Stat(event.Name)
 				if err != nil {
 					log.Println("Watcher:", err)
@@ -211,6 +211,13 @@ func watchAndRun(buddy *Buddy) error {
 						log.Println("fsnotify error:", err)
 					}
 					log.Println("Watcher: watching " + event.Name)
+					break
+				}
+			}
+			if event.Op&fsnotify.Write == fsnotify.Write {
+				info, err := os.Stat(event.Name)
+				if err != nil {
+					log.Println("Watcher:", err)
 					break
 				}
 				if event.Name == buddy.Lock.Path {
