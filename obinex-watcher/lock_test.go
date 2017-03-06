@@ -10,10 +10,28 @@ import (
 
 const PRE = "__obinex-test__"
 
-func TestGetUid(t *testing.T) {
+func createLock(duration time.Duration) *Lock {
+	lockpath := PRE + "testlockfile"
+	lock := &Lock{
+		uid:  uint32(os.Getuid()),
+		Path: lockpath,
+	}
+
+	f, _ := os.Create(lockpath)
+	f.WriteString(time.Now().Add(time.Second).Format(time.RFC3339))
+	f.Close()
+	return lock
+}
+
+func createFile() string {
 	path := PRE + "testfile"
 	f, _ := os.Create(path)
 	f.Close()
+	return path
+}
+
+func TestGetUid(t *testing.T) {
+	path := createFile()
 	defer os.Remove(path)
 
 	uid := os.Getuid()
@@ -27,20 +45,10 @@ func TestGetUid(t *testing.T) {
 }
 
 func TestLock(t *testing.T) {
-	lockpath := PRE + "testlockfile"
-	lock := &Lock{
-		uid:  uint32(os.Getuid()),
-		Path: lockpath,
-	}
+	lock := createLock(time.Second)
+	defer os.Remove(lock.Path)
 
-	f, _ := os.Create(lockpath)
-	f.WriteString(time.Now().Add(time.Second).Format(time.RFC3339))
-	f.Close()
-	defer os.Remove(lockpath)
-
-	path := PRE + "testfile"
-	f, _ = os.Create(path)
-	f.Close()
+	path := createFile()
 	defer os.Remove(path)
 
 	lock.Set()
@@ -53,5 +61,22 @@ func TestLock(t *testing.T) {
 	ok = lock.Get(path)
 	if ok {
 		t.Errorf("ok = true, want false\n")
+	}
+}
+
+func TestUnlock(t *testing.T) {
+	lock := createLock(time.Minute)
+	defer os.Remove(lock.Path)
+
+	path := createFile()
+	defer os.Remove(path)
+
+	lock.Set()
+	lock.uid = 0
+	lock.Unset()
+	time.Sleep(10 * time.Microsecond)
+	ok := lock.Get(path)
+	if !ok {
+		t.Errorf("ok = false, want true\n")
 	}
 }

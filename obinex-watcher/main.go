@@ -198,6 +198,11 @@ func watchAndRun(buddy *Buddy) error {
 	for {
 		select {
 		case event := <-watcher.Events:
+			if event.Op&fsnotify.Remove == fsnotify.Remove {
+				if event.Name == buddy.Lock.Path {
+					buddy.Lock.Unset()
+				}
+			}
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				info, err := os.Stat(event.Name)
 				if err != nil {

@@ -24,6 +24,7 @@ type Lock struct {
 	uid     uint32
 	set     bool
 	Path    string
+	unlock  chan bool
 }
 
 func (l Lock) Get(bin string) bool {
@@ -59,13 +60,28 @@ func (l *Lock) Set() error {
 	l.uid = uid
 	l.Expires = date
 	l.set = true
+	l.unlock = make(chan bool, 1)
 	go func() {
 		c := time.After(l.Expires.Sub(time.Now()))
-		<-c
+		select {
+		case <-c:
+			break
+		case <-l.unlock:
+			break
+		}
 		l.set = false
 		os.Remove(l.Path)
 		log.Println("Lock: unlocked")
 	}()
 	log.Println("Lock: locked")
 	return nil
+}
+
+func (l Lock) Unset() {
+	select {
+	case l.unlock <- true:
+		break
+	default:
+		break
+	}
 }
