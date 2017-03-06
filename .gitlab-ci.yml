@@ -9,7 +9,7 @@ before_script:
     - export PATH=$GOPATH/bin:$PATH
     - go get golang.org/x/net/websocket
     - go get golang.org/x/sys/unix
-    - go get github.com/tylerb/graceful
+    - go get golang.org/x/net/http2
     - go get github.com/wadey/gocovmerge
     - go install github.com/wadey/gocovmerge
     - cd src/gitlab.cs.fau.de/luksen/obinex

@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/tarm/serial"
-	"github.com/tylerb/graceful"
 	"golang.org/x/net/websocket"
+	"gopkg.in/tylerb/graceful.v1"
 
 	o "gitlab.cs.fau.de/luksen/obinex"
 )
