@@ -63,21 +63,21 @@ func changeStateOnPath(path, state string) string {
 func toQueued(bin string) string {
 	org := bin
 	// Create new structure
-	t := time.Now().Format(time.RFC3339)
+	t := time.Now().Format("2016_01_02_-_15_04_05")
 	dir := filepath.Dir(bin) + "/"
 	bin = filepath.Base(bin)
 	dir = changeStateOnPath(dir, "queued")
 	dir = filepath.Join(dir, bin+"_"+t)
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
-		log.Println("Output Error:", err)
+		log.Println("Mkdir Error:", err)
 		return ""
 	}
 
 	// Move bin
 	err = os.Rename(org, filepath.Join(dir, bin))
 	if err != nil {
-		log.Println("Output Error:", err)
+		log.Println("Rename Error:", err)
 	}
 	return filepath.Join(dir, bin)
 }
