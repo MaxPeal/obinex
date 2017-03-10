@@ -141,7 +141,6 @@ func watchAndRun(buddy *Buddy) error {
 	go func(client *rpc.Client, queue chan string) {
 		for bin := range buddy.queue {
 			bin = toExecuting(bin)
-			log.Println(bin)
 			output, err := run(buddy.rpc, bin)
 			if err != nil {
 				shutdown <- err

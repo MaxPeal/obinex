@@ -129,7 +129,6 @@ func handleOutput(c chan string) {
 	for {
 		select {
 		case line := <-c:
-			log.Printf("Output: %s", line)
 			if runningBin {
 				s += line
 			}
@@ -156,14 +155,6 @@ func handleOutput(c chan string) {
 
 func main() {
 	flag.Parse()
-	// log to stdout and a file
-	f, err := os.Create("obinex.log")
-	if err != nil {
-		log.Print("no log file:", err)
-	} else {
-		mw := io.MultiWriter(os.Stderr, f)
-		log.SetOutput(mw)
-	}
 
 	hostname, err := os.Hostname()
 	if err != nil {
