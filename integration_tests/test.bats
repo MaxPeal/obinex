@@ -22,8 +22,6 @@ setup()  {
 
 	grep "RPC: binary request: mock/executing/foo_.*/foo" out_server
 	grep "Server: binary served" out_server
-	grep "Output: executing" out_server
-	grep "Output: Graceful shutdown initiated" out_server
 
 	grep "Watcher: queueing mock/in/foo" out_watcher
 }
