@@ -20,7 +20,10 @@ build:
 
 test:
     script:
-        - go test gitlab.cs.fau.de/luksen/obinex/...
+        - go test gitlab.cs.fau.de/luksen/obinex/obinex
+        - go test gitlab.cs.fau.de/luksen/obinex/obinex-watcher
+        - go test gitlab.cs.fau.de/luksen/obinex/obinex-server
+        - go test gitlab.cs.fau.de/luksen/obinex/obinex-hwmock
         - cd integration_tests
         - ./run.sh
 
