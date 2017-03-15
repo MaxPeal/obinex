@@ -32,7 +32,7 @@ var (
 func Broadcast(c chan WebData) chan<- chan WebData {
 	cNewChans := make(chan chan WebData)
 	go func() {
-		cs := make([]chan WebData, 5)
+		var cs []chan WebData
 		for {
 			select {
 			case newChan := <-cNewChans:
