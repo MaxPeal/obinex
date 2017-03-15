@@ -19,13 +19,31 @@ var (
 )
 
 func init() {
-	commands := `Valid commands:
-	help: print this help
-	lock: lock one of the boxes for yourself
+	commands := `
+Commands:
+  help
+    	print this help
+  lock timestring
+    	lock one of the boxes for yourself for the given duration
+
+Timestring:
+  A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
+  will be set to automatically expire after the given duration. Currently
+  supported units are "h", "m" and "s".
+
+Examples:
+  To lock the fastbox for 24 hours you would run:
+
+    	obinex -box fastbox -cmd lock 24h
+
+File system interface:
+  A lot of obinex actions (some of which are not supported by this tool) can be 
+  executed through the file system at 'watchdir' (/proj/i4obinex/). See
+  README.md or gitlab.cs.fau.de/luksen/obinex for documentation.
 `
-	flag.StringVar(&command, "cmd", "help", "`command` to send to the server")
+	flag.StringVar(&command, "cmd", "help", "`command` to execute")
 	flag.StringVar(&box, "box", o.CurrentBox(), "name of the hardwarebox you want to control")
-	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`Path` to the directory being watched for binaries.")
+	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
