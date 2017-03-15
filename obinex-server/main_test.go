@@ -40,8 +40,9 @@ func TestBinaryServeHandler(t *testing.T) {
 		binaryServeHandler(w, r)
 		done <- true
 	}()
-	<-activateOutputChan
+	<-lateEoeChan
 	binChan <- tmpfile.Name()
+	<-binChan
 	<-done
 
 	if b := w.Body.String(); !strings.Contains(b, "foo") {
@@ -54,8 +55,9 @@ func TestBinaryServeHandler(t *testing.T) {
 		binaryServeHandler(w, r)
 		done <- true
 	}()
-	<-activateOutputChan
+	<-lateEoeChan
 	binChan <- "foo"
+	<-binChan
 	<-done
 
 	if c := w.Code; c != http.StatusInternalServerError {
@@ -89,38 +91,44 @@ func TestHandleOutput(t *testing.T) {
 
 	go handleOutput(c)
 	defer func() { testDone <- true }()
+	defer os.Remove("output.txt")
+
+	outputChan := make(chan WebData)
+	wsAddChan <- outputChan
 
 	// test normal operation
 	binQueue = []string{"foo"}
-	activateOutputChan <- struct{}{}
+	binChan <- "foo"
 	c <- "foo\n"
 	c <- o.EndMarker + "\n"
-	s := <-outputChan
-	if s != "foo\n"+o.EndMarker+"\n" {
-		t.Errorf("string = %s, want fooGraceful...", s)
+	<-eoeChan
+	if len(binQueue) != 0 {
+		t.Errorf("len(binQueue) = %d, expected 0", len(binQueue))
 	}
-
-	// test abandoned bin
-	binQueue = []string{} // queue is too short
-	activateOutputChan <- struct{}{}
-	c <- o.EndMarker + "\n"
-	s = <-outputChan
-	if s != o.EndMarker+"\n" {
-		t.Errorf("string = %s, want %s", s, o.EndMarker)
+	f, _ := os.Open("output.txt")
+	b, _ := ioutil.ReadAll(f)
+	f.Close()
+	s := string(b)
+	if s != "foo\n"+o.EndMarker+"\n" {
+		t.Errorf("s = %s, expected \"foo\\n%s\\n", s, o.EndMarker)
 	}
 
 	// test late detection
 	binQueue = []string{"foo"}
-	activateOutputChan <- struct{}{}
+	binChan <- "foo"
 	c <- "foo\n"
-	activateOutputChan <- struct{}{}
-	s = <-outputChan
-	if s != "foo\n" {
-		t.Errorf("string = %s, want foo", s)
+	lateEoeChan <- struct{}{}
+	<-eoeChan
+	if len(binQueue) != 0 {
+		t.Errorf("len(binQueue) = %d, expected 0", len(binQueue))
 	}
-
-	c <- o.EndMarker + "\n"
-	<-outputChan
+	f, _ = os.Open("output.txt")
+	b, _ = ioutil.ReadAll(f)
+	f.Close()
+	s = string(b)
+	if s != "foo\n" {
+		t.Errorf("s = %s, expected \"foo\\n", s)
+	}
 }
 
 func TestRun(t *testing.T) {
@@ -132,14 +140,13 @@ func TestRun(t *testing.T) {
 
 	rpc := Rpc{}
 	in := o.WatchDir + "somebox/in/somedir/somebin"
-	out := ""
 	done := make(chan bool)
 	err := error(nil)
 
-	go func() { err = rpc.Run(in, &out); done <- true }()
+	go func() { err = rpc.Run(in, nil); done <- true }()
 	defer func() { binQueue = []string{} }()
 	bin := <-binChan
-	outputChan <- "someoutput"
+	eoeChan <- struct{}{}
 	<-done
 
 	if bin != o.WatchDir+"somebox/in/somedir/somebin" {
@@ -147,9 +154,6 @@ func TestRun(t *testing.T) {
 	}
 	if err != nil {
 		t.Errorf("error = %s, want nil", err)
-	}
-	if out != "someoutput" {
-		t.Errorf("out = %s, want someoutput", out)
 	}
 	if binQueue[0] != "somedir/somebin" {
 		t.Errorf("binQueue = %v, want somedir/somebin", binQueue)
