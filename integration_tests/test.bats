@@ -25,6 +25,13 @@ setup()  {
 	grep "Watcher: queueing mock/in/foo" out_watcher
 }
 
+@test "execution without graceful shutdown" {
+	echo "echo foo" > mock/in/foo
+	sleep 0.5
+
+	grep "binary request return" out_server
+}
+
 @test "execution filecontent" {
 	cp testbinary.sh mock/in/foo
 	sleep 0.5
