@@ -16,7 +16,7 @@ setup()  {
 }
 
 @test "execution output" {
-	echo "somecontent" > mock/in/foo
+	cp testbinary.sh mock/in/foo
 	sleep 0.5
 
 	grep "RPC: binary request: mock/executing/foo_.*/foo" out_server
@@ -26,10 +26,10 @@ setup()  {
 }
 
 @test "execution filecontent" {
-	echo "somecontent" > mock/in/foo
+	cp testbinary.sh mock/in/foo
 	sleep 0.5
 
-	[ "x$( cat mock/out/foo*/foo )" == "xsomecontent" ]
+	diff mock/out/foo*/foo testbinary.sh
 	diff mock/out/foo*/output.txt <(echo "executing
 executing
 executing
@@ -37,7 +37,7 @@ Graceful shutdown initiated")
 }
 
 @test "execution directories" {
-	echo "somecontent" > mock/in/foo
+	cp testbinary.sh mock/in/foo
 	sleep 0.5
 
 	ls mock/queued
@@ -50,7 +50,7 @@ Graceful shutdown initiated")
 
 	grep "Watcher: watching mock/in/sub" out_watcher
 
-	echo "somecontent" > mock/in/sub/foo
+	cp testbinary.sh mock/in/sub/foo
 
 	ls mock/queued/sub/
 	ls mock/executing/sub/

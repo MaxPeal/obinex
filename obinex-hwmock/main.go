@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"syscall"
 	"time"
 
@@ -36,18 +38,32 @@ func Run() {
 	defer tty.Close()
 	log.Println("Providing serial device at", tty.Name())
 
+	tr := &http.Transport{
+		DisableKeepAlives: true,
+	}
+	client := &http.Client{Transport: tr}
+
 	for {
-		_, err := http.Get("http://localhost:12334/mock")
+		res, err := client.Get("http://localhost:12334/mock")
 		for check(err) {
 			log.Println("Waiting for server...")
 			time.Sleep(1 * time.Second)
-			_, err = http.Get("http://localhost:12334/mock")
+			res, err = client.Get("http://localhost:12334/mock")
 		}
-		log.Println("Giving output")
-		io.WriteString(w, "executing\n")
-		io.WriteString(w, "executing\n")
-		io.WriteString(w, "executing\n")
-		io.WriteString(w, "Graceful shutdown initiated\n")
+		log.Println("Executing")
+		f, err := os.Create("hwmock_tmp_script")
+		if err != nil {
+			res.Body.Close()
+			io.WriteString(w, fmt.Sprintln(err))
+			continue
+		}
+		io.Copy(f, res.Body)
+		res.Body.Close()
+		f.Close()
+		out, _ := exec.Command("bash", "hwmock_tmp_script").CombinedOutput()
+		w.Write(out)
+		os.Remove(f.Name())
+		log.Println("Done")
 	}
 }
 
