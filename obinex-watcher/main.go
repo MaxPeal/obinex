@@ -37,14 +37,13 @@ func (b *Buddy) Connect() error {
 	return nil
 }
 
-func (b *Buddy) Close() {
-	b.rpc.Close()
+func (b *Buddy) Run(bin string) error {
+	err := b.rpc.Call("Rpc.Run", bin, nil)
+	return err
 }
 
-func run(client *rpc.Client, bin string) (string, error) {
-	var res string
-	err := client.Call("Rpc.Run", bin, &res)
-	return res, err
+func (b *Buddy) Close() {
+	b.rpc.Close()
 }
 
 func changeStateOnPath(path, state string) string {
@@ -141,19 +140,11 @@ func watchAndRun(buddy *Buddy) error {
 	go func(client *rpc.Client, queue chan string) {
 		for bin := range buddy.queue {
 			bin = toExecuting(bin)
-			output, err := run(buddy.rpc, bin)
+			err := buddy.Run(bin)
 			if err != nil {
 				shutdown <- err
 				return
 			}
-			// Write output file
-			f, err := os.Create(filepath.Join(filepath.Dir(bin), "output.txt"))
-			if err != nil {
-				shutdown <- err
-				return
-			}
-			f.WriteString(output)
-			f.Close()
 			toOut(bin)
 		}
 	}(buddy.rpc, buddy.queue)

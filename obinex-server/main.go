@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -27,9 +28,9 @@ var binQueue []string
 
 // Channels for synchronizing Run calls
 var (
-	binChan            = make(chan string)
-	outputChan         = make(chan string)
-	activateOutputChan = make(chan struct{})
+	binChan     = make(chan string)
+	eoeChan     = make(chan struct{}) // eoe = end of execution
+	lateEoeChan = make(chan struct{})
 )
 
 // Rpc provides the public methods needed for rpc.
@@ -37,13 +38,13 @@ type Rpc struct{}
 
 // Run allows a remote caller to request execution of a binary.
 // The Path should be absolute or relative to the _server_ binary.
-func (r *Rpc) Run(path string, reply *string) error {
+func (r *Rpc) Run(path string, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", path)
 	boxname := o.CurrentBox()
 	binQueue = append(binQueue, path[len(WatchDir)+len(boxname)+4:])
 	wsChan <- WebData{Queue: binQueue}
 	binChan <- path
-	*reply = <-outputChan
+	<-eoeChan
 	log.Printf("RPC: binary request return: %s\n", path)
 	return nil
 }
@@ -51,8 +52,12 @@ func (r *Rpc) Run(path string, reply *string) error {
 // binaryServeHandler serves the binaries to the hardware.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested\n")
-	activateOutputChan <- struct{}{}
+	lateEoeChan <- struct{}{}
 	bin := <-binChan
+	// This is for handleOutput. We do this here because we cana be sure
+	// that there was an rpc-request as well as an http-request. Also
+	// lateEoe has been signalled, so the old output is definitley done.
+	binChan <- bin
 	f, err := os.Open(bin)
 	// Sometimes there is a delay before we can access the file via NFS, so
 	// we wait up to a second before erroring out.
@@ -114,23 +119,27 @@ func getSerialOutput(c chan string) {
 
 // handleOutput takes output from the provided channel and distributes it.
 func handleOutput(c chan string) {
-	var s string
 	runningBin := false
+	var f *os.File
+	var err error
 	endOfBin := func() {
-		log.Printf("Server: end of binary output\n")
 		if len(binQueue) > 0 {
 			binQueue = binQueue[1:]
 		}
 		wsChan <- WebData{Queue: binQueue}
-		outputChan <- s
-		s = ""
+		eoeChan <- struct{}{}
+		if f != nil {
+			f.Close()
+		}
 		runningBin = false
 	}
 	for {
 		select {
 		case line := <-c:
 			if runningBin {
-				s += line
+				if f != nil {
+					f.WriteString(line)
+				}
 			}
 			parseLine := strings.TrimSpace(line)
 			wsChan <- WebData{LogLine: line}
@@ -139,13 +148,18 @@ func handleOutput(c chan string) {
 				strings.HasPrefix(parseLine, "Could not boot") {
 				endOfBin()
 			}
-		case <-activateOutputChan:
+		case <-lateEoeChan:
 			// if no end of execution was detected
 			if runningBin {
 				endOfBin()
 			}
+		case bin := <-binChan:
+			f, err = os.Create(filepath.Join(filepath.Dir(bin), "output.txt"))
+			if err != nil {
+				log.Println("Server:", err)
+			}
 			runningBin = true
-			log.Printf("Server: start of binary output\n")
+			log.Println("Server: executing", bin)
 		case <-testDone:
 			log.Println("Test: exiting handleOutput")
 			return

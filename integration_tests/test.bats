@@ -10,7 +10,6 @@ setup()  {
 @test "startup only" {
 	grep "serving mock" out_server
 	grep "binary requested" out_server
-	grep "start of binary output" out_server
 
 	grep "RPC: localhost connected" out_watcher
 	grep "Watcher: watching mock/in" out_watcher
