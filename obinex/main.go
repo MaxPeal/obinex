@@ -92,6 +92,17 @@ func copyFile(src, dest string) error {
 
 type CommandFunction func([]string) error
 
+var Commands map[string]CommandFunction = map[string]CommandFunction{
+	"help": CmdHelp,
+	"lock": CmdLock,
+	"run":  CmdRun,
+}
+
+func CmdHelp(args []string) error {
+	flag.Usage()
+	return nil
+}
+
 func CmdLock(args []string) error {
 	arg := strings.Join(args, "")
 	duration, err := time.ParseDuration(arg)
@@ -111,11 +122,6 @@ func CmdLock(args []string) error {
 	return nil
 }
 
-func CmdHelp(args []string) error {
-	flag.Usage()
-	return nil
-}
-
 func CmdRun(args []string) error {
 	arg := strings.Join(args, " ")
 	return copyFile(arg, filepath.Join(watchdir, box, "in", filepath.Base(arg)))
@@ -125,18 +131,7 @@ func main() {
 	log.SetFlags(0)
 	flag.Parse()
 
-	var cmdFunc CommandFunction
-	switch command {
-	case "lock":
-		cmdFunc = CmdLock
-	case "run":
-		cmdFunc = CmdRun
-	case "help":
-		fallthrough
-	default:
-		cmdFunc = CmdHelp
-	}
-	err := cmdFunc(flag.Args())
+	err := Commands[command](flag.Args())
 	if err != nil {
 		log.Fatal(err)
 	}
