@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/rpc"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	o "gitlab.cs.fau.de/luksen/obinex"
@@ -61,11 +63,35 @@ func connect() *rpc.Client {
 	return client
 }
 
-func CmdLock(args []string) error {
-	arg := ""
-	for _, a := range args {
-		arg += a
+func closeErr(c io.Closer) {
+	err := c.Close()
+	if err != nil {
+		log.Fatal(err)
 	}
+}
+
+func copyFile(src, dest string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer closeErr(in)
+	out, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, in)
+	close_err := out.Close()
+	if err != nil {
+		return err
+	}
+	return close_err
+}
+
+type CommandFunction func([]string) error
+
+func CmdLock(args []string) error {
+	arg := strings.Join(args, "")
 	duration, err := time.ParseDuration(arg)
 	if err != nil {
 		return err
@@ -83,17 +109,33 @@ func CmdLock(args []string) error {
 	return nil
 }
 
+func CmdHelp(args []string) error {
+	flag.Usage()
+	return nil
+}
+
+func CmdRun(args []string) error {
+	arg := strings.Join(args, " ")
+	return copyFile(arg, filepath.Join(watchdir, box, "in", filepath.Base(arg)))
+}
+
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
 
+	var cmdFunc CommandFunction
 	switch command {
 	case "lock":
-		err := CmdLock(flag.Args())
-		if err != nil {
-			log.Fatal(err)
-		}
+		cmdFunc = CmdLock
+	case "run":
+		cmdFunc = CmdRun
+	case "help":
+		fallthrough
 	default:
-		flag.Usage()
+		cmdFunc = CmdHelp
+	}
+	err := cmdFunc(flag.Args())
+	if err != nil {
+		log.Fatal(err)
 	}
 }
