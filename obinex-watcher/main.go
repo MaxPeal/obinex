@@ -207,6 +207,9 @@ func watchAndRun(buddy *Buddy) error {
 					log.Println("Watcher: watching " + event.Name)
 					break
 				}
+				if event.Name == buddy.Lock.Path {
+					break
+				}
 				if buddy.Lock.Get(event.Name) {
 					log.Println("Watcher: queueing", event.Name)
 					path := toQueued(event.Name)
