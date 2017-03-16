@@ -2,6 +2,7 @@
 
 
 function global_setup() {
+	go build gitlab.cs.fau.de/luksen/obinex/obinex
 	go build gitlab.cs.fau.de/luksen/obinex/obinex-hwmock
 	go test -c -cover gitlab.cs.fau.de/luksen/obinex/obinex-server -tags integration -o obinex-server
 	go test -c -cover gitlab.cs.fau.de/luksen/obinex/obinex-watcher -tags integration -o obinex-watcher
@@ -9,7 +10,7 @@ function global_setup() {
 
 
 function global_teardown() {
-	rm obinex-hwmock obinex-server obinex-watcher
+	rm obinex-hwmock obinex-server obinex-watcher obinex
 	# generate coverage html
 	gocovmerge server_test_*.cov > server.cov
 	gocovmerge watcher_test_*.cov > watcher.cov
@@ -20,5 +21,10 @@ function global_teardown() {
 
 
 global_setup
-bats .
+if [ -z "$@" ]
+then
+	bats .
+else
+	bats "$@"
+fi
 global_teardown
