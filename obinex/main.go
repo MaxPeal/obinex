@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -29,6 +30,8 @@ Commands:
     	lock one of the boxes for yourself for the given duration
   run binary
     	submit the binary for execution
+  output binary
+    	get output for the most recently submitted binary with this name
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
@@ -36,9 +39,13 @@ Timestring:
   supported units are "h", "m" and "s".
 
 Examples:
-  To lock the fastbox for 24 hours you would run:
+  To lock the fastbox for 24 hours, you would run:
 
     	obinex -box fastbox -cmd lock 24h
+
+  To get the output from your last submitted binary, run:
+
+    	obinex -box faui49big01 -cmd status mysubdir/mybin
 
 File system interface:
   A lot of obinex actions (some of which are not supported by this tool) can be 
@@ -93,9 +100,10 @@ func copyFile(src, dest string) error {
 type CommandFunction func([]string) error
 
 var Commands map[string]CommandFunction = map[string]CommandFunction{
-	"help": CmdHelp,
-	"lock": CmdLock,
-	"run":  CmdRun,
+	"help":   CmdHelp,
+	"lock":   CmdLock,
+	"run":    CmdRun,
+	"output": CmdOutput,
 }
 
 func CmdHelp(args []string) error {
@@ -125,6 +133,71 @@ func CmdLock(args []string) error {
 func CmdRun(args []string) error {
 	arg := strings.Join(args, " ")
 	return copyFile(arg, filepath.Join(watchdir, box, "in", filepath.Base(arg)))
+}
+
+func CmdOutput(args []string) error {
+	name := strings.Join(args, " ")
+	boxdir := filepath.Join(watchdir, box)
+
+	path := filepath.Join(boxdir, "in", name)
+	_, err := os.Stat(path)
+	if err == nil {
+		log.Println("Your binary is still in \"in/\". This means it was probably blocked by someone else's lock")
+		return nil
+	}
+
+	var mostRecentDate time.Time
+	var mostRecentDir string
+	var mostRecentStatus string
+	for _, dir := range []string{"queued", "executing", "out"} {
+		prefix := filepath.Join(boxdir, dir, name) + "_"
+		dateDirs, err := filepath.Glob(prefix + "*")
+		if err != nil {
+			return err
+		}
+		for _, dd := range dateDirs {
+			date, _ := time.Parse(prefix+o.DirectoryDateFormat, dd)
+			if date.After(mostRecentDate) {
+				mostRecentDate = date
+				mostRecentDir = dd
+				mostRecentStatus = dir
+			}
+		}
+	}
+
+	switch mostRecentStatus {
+	case "out":
+		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
+		if err != nil {
+			return err
+		}
+		defer outFile.Close()
+
+		_, err = io.Copy(os.Stdout, outFile)
+		if err != nil {
+			return err
+		}
+
+	case "executing":
+		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
+		if err != nil {
+			return err
+		}
+		defer outFile.Close()
+
+		scanner := bufio.NewScanner(outFile)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+
+		if err := scanner.Err(); err != nil {
+			return err
+		}
+
+	case "queued":
+		log.Println("Your binary is queued.")
+	}
+	return nil
 }
 
 func main() {
