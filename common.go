@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+// DirecotryDateFormat is the format string used for timestamps in binary
+// directries
+const DirectoryDateFormat = "2006_01_02_-_15_04_05.000000000"
+
 // WatchDir is the directory watched by obinex
 // It must be absolute or relative to both obinex-server and obinex-watcher.
 const WatchDir = "/proj/i4obinex/"

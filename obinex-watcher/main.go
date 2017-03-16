@@ -62,7 +62,7 @@ func changeStateOnPath(path, state string) string {
 func toQueued(bin string) string {
 	org := bin
 	// Create new structure
-	t := time.Now().Format("2006_01_02_-_15_04_05")
+	t := time.Now().Format(o.DirectoryDateFormat)
 	dir := filepath.Dir(bin) + "/"
 	bin = filepath.Base(bin)
 	dir = changeStateOnPath(dir, "queued")
