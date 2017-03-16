@@ -139,13 +139,6 @@ func CmdOutput(args []string) error {
 	name := strings.Join(args, " ")
 	boxdir := filepath.Join(watchdir, box)
 
-	path := filepath.Join(boxdir, "in", name)
-	_, err := os.Stat(path)
-	if err == nil {
-		log.Println("Your binary is still in \"in/\". This means it was probably blocked by someone else's lock")
-		return nil
-	}
-
 	var mostRecentDate time.Time
 	var mostRecentDir string
 	var mostRecentStatus string
