@@ -27,6 +27,8 @@ Commands:
     	print this help
   lock timestring
     	lock one of the boxes for yourself for the given duration
+  run binary
+    	submit the binary for execution
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
