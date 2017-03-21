@@ -45,7 +45,7 @@ Examples:
 
   To get the output from your last submitted binary, run:
 
-    	obinex -box faui49big01 -cmd status mysubdir/mybin
+    	obinex -box faui49big01 -cmd output mysubdir/mybin
 
 File system interface:
   A lot of obinex actions (some of which are not supported by this tool) can be 
