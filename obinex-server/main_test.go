@@ -41,8 +41,8 @@ func TestBinaryServeHandler(t *testing.T) {
 		done <- true
 	}()
 	<-lateEoeChan
-	binChan <- tmpfile.Name()
-	<-binChan
+	runToServChan <- tmpfile.Name()
+	<-servToOutChan
 	<-done
 
 	if b := w.Body.String(); !strings.Contains(b, "foo") {
@@ -56,8 +56,8 @@ func TestBinaryServeHandler(t *testing.T) {
 		done <- true
 	}()
 	<-lateEoeChan
-	binChan <- "foo"
-	<-binChan
+	runToServChan <- "foo"
+	<-servToOutChan
 	<-done
 
 	if c := w.Code; c != http.StatusInternalServerError {
@@ -98,7 +98,7 @@ func TestHandleOutput(t *testing.T) {
 
 	// test normal operation
 	binQueue = []string{"foo"}
-	binChan <- "foo"
+	servToOutChan <- "foo"
 	c <- "foo\n"
 	c <- o.EndMarker + "\n"
 	<-eoeChan
@@ -115,7 +115,7 @@ func TestHandleOutput(t *testing.T) {
 
 	// test late detection
 	binQueue = []string{"foo"}
-	binChan <- "foo"
+	servToOutChan <- "foo"
 	c <- "foo\n"
 	lateEoeChan <- struct{}{}
 	<-eoeChan
@@ -145,7 +145,7 @@ func TestRun(t *testing.T) {
 
 	go func() { err = rpc.Run(in, nil); done <- true }()
 	defer func() { binQueue = []string{} }()
-	bin := <-binChan
+	bin := <-runToServChan
 	eoeChan <- struct{}{}
 	<-done
 

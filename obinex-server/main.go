@@ -28,9 +28,10 @@ var binQueue []string
 
 // Channels for synchronizing Run calls
 var (
-	binChan     = make(chan string)
-	eoeChan     = make(chan struct{}) // eoe = end of execution
-	lateEoeChan = make(chan struct{})
+	runToServChan = make(chan string)
+	servToOutChan = make(chan string)
+	eoeChan       = make(chan struct{}) // eoe = end of execution
+	lateEoeChan   = make(chan struct{})
 )
 
 // Rpc provides the public methods needed for rpc.
@@ -43,7 +44,7 @@ func (r *Rpc) Run(path string, _ *struct{}) error {
 	boxname := o.CurrentBox()
 	binQueue = append(binQueue, path[len(WatchDir)+len(boxname)+4:])
 	wsChan <- WebData{Queue: binQueue}
-	binChan <- path
+	runToServChan <- path
 	<-eoeChan
 	log.Printf("RPC: binary request return: %s\n", path)
 	return nil
@@ -53,11 +54,11 @@ func (r *Rpc) Run(path string, _ *struct{}) error {
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
 	lateEoeChan <- struct{}{}
-	bin := <-binChan
+	bin := <-runToServChan
 	// This is for handleOutput. We do this here because we can be sure
 	// that there was an rpc-request as well as an http-request. Also
 	// lateEoe has been signalled, so the old output is definitley done.
-	binChan <- bin
+	servToOutChan <- bin
 	f, err := os.Open(bin)
 	// Sometimes there is a delay before we can access the file via NFS, so
 	// we wait up to a second before erroring out.
@@ -154,7 +155,7 @@ func handleOutput(c chan string) {
 			if runningBin {
 				endOfBin()
 			}
-		case bin := <-binChan:
+		case bin := <-servToOutChan:
 			f, err = os.Create(filepath.Join(filepath.Dir(bin), "output.txt"))
 			if err != nil {
 				log.Println("Server:", err)
