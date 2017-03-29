@@ -28,8 +28,8 @@ var binQueue []string
 
 // Channels for synchronizing Run calls
 var (
-	runToServChan = make(chan string)
-	servToOutChan = make(chan string)
+	runToServChan = make(chan o.WorkPackage)
+	servToOutChan = make(chan o.WorkPackage)
 	eoeChan       = make(chan struct{}) // eoe = end of execution
 	lateEoeChan   = make(chan struct{})
 )
@@ -39,14 +39,14 @@ type Rpc struct{}
 
 // Run allows a remote caller to request execution of a binary.
 // The Path should be absolute or relative to the _server_ binary.
-func (r *Rpc) Run(path string, _ *struct{}) error {
-	log.Printf("RPC: binary request: %s\n", path)
+func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
+	log.Printf("RPC: binary request: %s\n", wp.Path)
 	boxname := o.CurrentBox()
-	binQueue = append(binQueue, path[len(WatchDir)+len(boxname)+4:])
+	binQueue = append(binQueue, wp.Path[len(WatchDir)+len(boxname)+4:])
 	wsChan <- WebData{Queue: binQueue}
-	runToServChan <- path
+	runToServChan <- wp
 	<-eoeChan
-	log.Printf("RPC: binary request return: %s\n", path)
+	log.Printf("RPC: binary request return: %s\n", wp.Path)
 	return nil
 }
 
@@ -54,12 +54,12 @@ func (r *Rpc) Run(path string, _ *struct{}) error {
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
 	lateEoeChan <- struct{}{}
-	bin := <-runToServChan
+	wp := <-runToServChan
 	// This is for handleOutput. We do this here because we can be sure
 	// that there was an rpc-request as well as an http-request. Also
 	// lateEoe has been signalled, so the old output is definitley done.
-	servToOutChan <- bin
-	f, err := os.Open(bin)
+	servToOutChan <- wp
+	f, err := os.Open(wp.Path)
 	// Sometimes there is a delay before we can access the file via NFS, so
 	// we wait up to a second before erroring out.
 	i := 10
@@ -70,7 +70,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("Server: file access problem, retrying...\n")
 		time.Sleep(100 * time.Millisecond)
-		f, err = os.Open(bin)
+		f, err = os.Open(wp.Path)
 	}
 	if err != nil {
 		log.Println(err)
@@ -155,13 +155,13 @@ func handleOutput(c chan string) {
 			if runningBin {
 				endOfBin()
 			}
-		case bin := <-servToOutChan:
-			f, err = os.Create(filepath.Join(filepath.Dir(bin), "output.txt"))
+		case wp := <-servToOutChan:
+			f, err = os.Create(filepath.Join(filepath.Dir(wp.Path), "output.txt"))
 			if err != nil {
 				log.Println("Server:", err)
 			}
 			runningBin = true
-			log.Println("Server: executing", bin)
+			log.Println("Server: executing", wp.Path)
 		case <-testDone:
 			log.Println("Test: exiting handleOutput")
 			return

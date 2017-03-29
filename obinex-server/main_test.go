@@ -41,7 +41,7 @@ func TestBinaryServeHandler(t *testing.T) {
 		done <- true
 	}()
 	<-lateEoeChan
-	runToServChan <- tmpfile.Name()
+	runToServChan <- o.WorkPackage{Path: tmpfile.Name()}
 	<-servToOutChan
 	<-done
 
@@ -56,7 +56,7 @@ func TestBinaryServeHandler(t *testing.T) {
 		done <- true
 	}()
 	<-lateEoeChan
-	runToServChan <- "foo"
+	runToServChan <- o.WorkPackage{Path: "foo"}
 	<-servToOutChan
 	<-done
 
@@ -98,7 +98,7 @@ func TestHandleOutput(t *testing.T) {
 
 	// test normal operation
 	binQueue = []string{"foo"}
-	servToOutChan <- "foo"
+	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	c <- o.EndMarker + "\n"
 	<-eoeChan
@@ -115,7 +115,7 @@ func TestHandleOutput(t *testing.T) {
 
 	// test late detection
 	binQueue = []string{"foo"}
-	servToOutChan <- "foo"
+	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	lateEoeChan <- struct{}{}
 	<-eoeChan
@@ -143,13 +143,13 @@ func TestRun(t *testing.T) {
 	done := make(chan bool)
 	err := error(nil)
 
-	go func() { err = rpc.Run(in, nil); done <- true }()
+	go func() { err = rpc.Run(o.WorkPackage{Path: in}, nil); done <- true }()
 	defer func() { binQueue = []string{} }()
-	bin := <-runToServChan
+	wp := <-runToServChan
 	eoeChan <- struct{}{}
 	<-done
 
-	if bin != o.WatchDir+"somebox/in/somedir/somebin" {
+	if wp.Path != o.WatchDir+"somebox/in/somedir/somebin" {
 		t.Errorf("bin = %s, want somebin", o.WatchDir+"somebox/in/somedir/somebin")
 	}
 	if err != nil {

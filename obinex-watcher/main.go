@@ -38,7 +38,7 @@ func (b *Buddy) Connect() error {
 }
 
 func (b *Buddy) Run(bin string) error {
-	err := b.rpc.Call("Rpc.Run", bin, nil)
+	err = b.rpc.Call("Rpc.Run", o.WorkPackage{Path: bin}, nil)
 	return err
 }
 

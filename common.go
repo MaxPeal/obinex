@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+type WorkPackage struct {
+	Path     string
+	Checksum []byte
+}
+
 // DirecotryDateFormat is the format string used for timestamps in binary
 // directries
 const DirectoryDateFormat = "2006_01_02_-_15_04_05.000000000"
