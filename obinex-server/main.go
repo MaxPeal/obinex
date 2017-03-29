@@ -54,7 +54,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
 	lateEoeChan <- struct{}{}
 	bin := <-binChan
-	// This is for handleOutput. We do this here because we cana be sure
+	// This is for handleOutput. We do this here because we can be sure
 	// that there was an rpc-request as well as an http-request. Also
 	// lateEoe has been signalled, so the old output is definitley done.
 	binChan <- bin
