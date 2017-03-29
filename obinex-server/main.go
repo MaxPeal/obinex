@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/md5"
 	"flag"
 	"io"
 	"log"
@@ -55,13 +56,10 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
 	lateEoeChan <- struct{}{}
 	wp := <-runToServChan
-	// This is for handleOutput. We do this here because we can be sure
-	// that there was an rpc-request as well as an http-request. Also
-	// lateEoe has been signalled, so the old output is definitley done.
-	servToOutChan <- wp
-	f, err := os.Open(wp.Path)
+
 	// Sometimes there is a delay before we can access the file via NFS, so
 	// we wait up to a second before erroring out.
+	f, err := os.Open(wp.Path)
 	i := 10
 	for err != nil {
 		i -= 1
@@ -77,7 +75,32 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
+
+	// The error (sometimes?) doesn't occur because of a rename happening
+	// on the watcher side, so we compare checksums as well.
+	h := md5.New()
+	_, err = io.Copy(h, f)
+	i = 10
+	for err != nil {
+		i -= 1
+		if i == -1 {
+			break
+		}
+		log.Printf("Server: checksum doesn't match, retrying...\n")
+		time.Sleep(100 * time.Millisecond)
+		f.Close()
+		f, _ = os.Open(wp.Path)
+		h = md5.New()
+		_, err = io.Copy(h, f)
+	}
 	defer f.Close()
+	f.Seek(0, 0)
+
+	// This is for handleOutput. We do this here because we can be sure
+	// that there was an rpc-request as well as an http-request. Also
+	// lateEoe has been signalled, so the old output is definitley done.
+	servToOutChan <- wp
+
 	n, err := io.Copy(w, f)
 	log.Printf("Server: served %dbytes", n)
 	if err != nil {

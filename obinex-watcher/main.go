@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/md5"
 	"errors"
 	"flag"
+	"io"
 	"log"
 	"net"
 	"net/rpc"
@@ -38,7 +40,18 @@ func (b *Buddy) Connect() error {
 }
 
 func (b *Buddy) Run(bin string) error {
-	err = b.rpc.Call("Rpc.Run", o.WorkPackage{Path: bin}, nil)
+	f, err := os.Open(bin)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return err
+	}
+
+	err = b.rpc.Call("Rpc.Run", o.WorkPackage{bin, h.Sum(nil)}, nil)
 	return err
 }
 
