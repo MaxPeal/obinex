@@ -51,7 +51,7 @@ func (r *Rpc) Run(path string, _ *struct{}) error {
 
 // binaryServeHandler serves the binaries to the hardware.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Server: binary requested\n")
+	log.Printf("Server: binary requested by hardware\n")
 	lateEoeChan <- struct{}{}
 	bin := <-binChan
 	// This is for handleOutput. We do this here because we cana be sure
@@ -77,7 +77,8 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer f.Close()
-	_, err = io.Copy(w, f)
+	n, err := io.Copy(w, f)
+	log.Printf("Server: served %dbytes", n)
 	if err != nil {
 		panic(err)
 	}
