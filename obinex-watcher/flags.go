@@ -18,11 +18,10 @@ func (sl *StringList) Set(value string) error {
 	return nil
 }
 
-var WatchDir string
 var Servers StringList
 
 func init() {
-	flag.StringVar(&WatchDir, "watchdir", o.WatchDir, "`Path` to the directory being watched for binaries.")
+	flag.StringVar(&o.WatchDir, "watchdir", o.WatchDir, "`Path` to the directory being watched for binaries.")
 	Servers = StringList(o.Servers)
 	flag.Var(&Servers, "servers", "`List` of servers to connect to")
 }

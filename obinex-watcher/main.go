@@ -1,17 +1,14 @@
 package main
 
 import (
-	"crypto/md5"
 	"errors"
 	"flag"
-	"io"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -24,7 +21,7 @@ type Buddy struct {
 	Servername string
 	InDir      string
 	Lock       Lock
-	queue      chan string
+	queue      chan o.WorkPackage
 	rpc        *rpc.Client
 }
 
@@ -39,84 +36,13 @@ func (b *Buddy) Connect() error {
 	return nil
 }
 
-func (b *Buddy) Run(bin string) error {
-	f, err := os.Open(bin)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	h := md5.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return err
-	}
-
-	err = b.rpc.Call("Rpc.Run", o.WorkPackage{bin, h.Sum(nil)}, nil)
+func (b *Buddy) Run(wp o.WorkPackage) error {
+	err := b.rpc.Call("Rpc.Run", wp, nil)
 	return err
 }
 
 func (b *Buddy) Close() {
 	b.rpc.Close()
-}
-
-func changeStateOnPath(path, state string) string {
-	n := len(WatchDir)
-	if WatchDir == "./" {
-		n = 0
-	}
-	// Split into box, state and rest of path
-	parts := strings.SplitN(path[n:], string(filepath.Separator), 3)
-	box := parts[0]
-	path = parts[2]
-	path = filepath.Join(WatchDir, box, state, path)
-	return path
-}
-
-func toQueued(bin string) string {
-	org := bin
-	// Create new structure
-	t := time.Now().Format(o.DirectoryDateFormat)
-	dir := filepath.Dir(bin) + "/"
-	bin = filepath.Base(bin)
-	dir = changeStateOnPath(dir, "queued")
-	dir = filepath.Join(dir, bin+"_"+t)
-	err := os.MkdirAll(dir, 0755)
-	if err != nil {
-		log.Println("Mkdir Error:", err)
-		return ""
-	}
-
-	// Move bin
-	err = os.Rename(org, filepath.Join(dir, bin))
-	if err != nil {
-		log.Println("Rename Error:", err)
-	}
-	return filepath.Join(dir, bin)
-}
-
-func toY(bin, y string) string {
-	dir := filepath.Dir(bin) + "/"
-	new := changeStateOnPath(dir, y)
-	err := os.MkdirAll(filepath.Join(new, ".."), 0755)
-	if err != nil {
-		log.Println("Output Error:", err)
-		return ""
-	}
-
-	// Move dir
-	err = os.Rename(dir, new)
-	if err != nil {
-		log.Println("Output Error:", err)
-	}
-	return filepath.Join(new, filepath.Base(bin))
-}
-
-func toExecuting(bin string) string {
-	return toY(bin, "executing")
-}
-
-func toOut(bin string) {
-	toY(bin, "out")
 }
 
 func shouldRetry(err error) bool {
@@ -150,17 +76,17 @@ func watchAndRun(buddy *Buddy) error {
 	// This function is currently located here because of the shutdown
 	// channel.
 	shutdown := make(chan error)
-	go func(client *rpc.Client, queue chan string) {
-		for bin := range buddy.queue {
-			bin = toExecuting(bin)
-			err := buddy.Run(bin)
+	go func(buddy *Buddy) {
+		for wp := range buddy.queue {
+			wp.ToExecuting()
+			err := buddy.Run(wp)
 			if err != nil {
 				shutdown <- err
 				return
 			}
-			toOut(bin)
+			wp.ToOut()
 		}
-	}(buddy.rpc, buddy.queue)
+	}(buddy)
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -225,8 +151,12 @@ func watchAndRun(buddy *Buddy) error {
 				}
 				if buddy.Lock.Get(event.Name) {
 					log.Println("Watcher: queueing", event.Name)
-					path := toQueued(event.Name)
-					buddy.queue <- path
+					wp := o.WorkPackage{Path: event.Name}
+					err = wp.ToQueued()
+					if err != nil {
+						log.Println("Error:", err)
+					}
+					buddy.queue <- wp
 				} else {
 					log.Println("Watcher: blocked", event.Name)
 				}
@@ -252,13 +182,13 @@ func watchAndRun(buddy *Buddy) error {
 
 func main() {
 	flag.Parse()
-	if WatchDir[len(WatchDir)-1] != '/' {
-		WatchDir += "/"
+	if o.WatchDir[len(o.WatchDir)-1] != '/' {
+		o.WatchDir += "/"
 	}
 	done := make(chan bool)
 	for _, server := range Servers {
 		box := o.ControlHosts[server]
-		inDir := filepath.Join(WatchDir, box, "in")
+		inDir := filepath.Join(o.WatchDir, box, "in")
 		buddy := &Buddy{
 			Servername: server,
 			Boxname:    box,
@@ -266,7 +196,7 @@ func main() {
 			Lock: Lock{
 				set:  false,
 				Path: filepath.Join(inDir, "lock")},
-			queue: make(chan string),
+			queue: make(chan o.WorkPackage),
 		}
 		buddy.Connect()
 
