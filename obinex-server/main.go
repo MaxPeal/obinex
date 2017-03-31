@@ -76,8 +76,8 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// The error (sometimes?) doesn't occur because of a rename happening
-	// on the watcher side, so we compare checksums as well.
+	// To make sure the file doesn't only exist but is also complete, we
+	// compare checksums as well.
 	h := md5.New()
 	_, err = io.Copy(h, f)
 	i = 10
