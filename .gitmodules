@@ -1,9 +1,6 @@
 [submodule "vendor/github.com/tarm/serial"]
 	path = vendor/github.com/tarm/serial
 	url = https://github.com/tarm/serial
-[submodule "vendor/github.com/fsnotify/fsnotify"]
-	path = vendor/github.com/fsnotify/fsnotify
-	url = https://github.com/fsnotify/fsnotify.git
 [submodule "vendor/github.com/kr/pty"]
 	path = vendor/github.com/kr/pty
 	url = http://github.com/kr/pty.git
@@ -13,3 +10,6 @@
 [submodule "vendor/github.com/urfave/negroni"]
 	path = vendor/github.com/urfave/negroni
 	url = http://github.com/urfave/negroni.git
+[submodule "vendor/github.com/luksen/fsnotify"]
+	path = vendor/github.com/luksen/fsnotify
+	url = http://github.com/luksen/fsnotify
