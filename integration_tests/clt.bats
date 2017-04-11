@@ -18,3 +18,13 @@ load setup_teardown
 	rm mock/in/lock
 	grep "unlocked" out_watcher
 }
+
+@test "output command" {
+	run_obinex -cmd run testbinary.sh
+	[ "$status" == 0 ]
+	sleep 2
+
+	run_obinex -cmd output testbinary.sh
+	[ "$status" == 0 ]
+	[ "$output" == "$testbin_output" ]
+}
