@@ -12,3 +12,9 @@ teardown() {
 	rm -r mock
 	rm out_mock out_server out_watcher
 }
+
+run_obinex() {
+	run ./obinex -watchdir . -box mock "$@"
+}
+
+testbin_output="$(./testbinary.sh)"
