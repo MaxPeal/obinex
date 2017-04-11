@@ -30,10 +30,7 @@ load setup_teardown
 	sleep 0.5
 
 	diff mock/out/foo*/foo testbinary.sh
-	diff mock/out/foo*/output.txt <(echo "executing
-executing
-executing
-Graceful shutdown initiated")
+	diff mock/out/foo*/output.txt <(echo "$testbin_output")
 }
 
 @test "execution directories" {
