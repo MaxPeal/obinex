@@ -57,7 +57,6 @@ func TestBinaryServeHandler(t *testing.T) {
 	}()
 	<-lateEoeChan
 	runToServChan <- o.WorkPackage{Path: "foo"}
-	<-servToOutChan
 	<-done
 
 	if c := w.Code; c != http.StatusInternalServerError {
