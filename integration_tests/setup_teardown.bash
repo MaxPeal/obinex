@@ -17,4 +17,4 @@ run_obinex() {
 	run ./obinex -watchdir . -box mock "$@"
 }
 
-testbin_output="$(./testbinary.sh)"
+testbin_output="$(./testbinary.sh; echo 'octopos-shutdown 0')"

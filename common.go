@@ -104,7 +104,7 @@ var WatchDir = "/proj/i4obinex/"
 const SerialPath = "/dev/ttyS0"
 
 // EndMarker is used to find the end of hw output
-const EndMarker = "Graceful shutdown initiated"
+const EndMarker = "octopos-shutdown "
 
 // ControlHosts contains the mapping of buddy hostname to hardware box hostname.
 var ControlHosts map[string]string = map[string]string{

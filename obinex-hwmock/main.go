@@ -88,9 +88,18 @@ func Run() {
 			continue
 		}
 
+		exitCode := 0
 		if err := cmd.Wait(); err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			exitErr, ok := err.(*exec.ExitError)
+			if ok {
+				waitStatus := exitErr.Sys().(syscall.WaitStatus)
+				exitCode = waitStatus.ExitStatus()
+			} else {
+				continue
+			}
 		}
+		fmt.Fprintf(w, "octopos-shutdown %d\n", exitCode)
 		os.Remove(f.Name())
 		log.Println("Done")
 	}

@@ -169,7 +169,7 @@ func handleOutput(c chan string) {
 			parseLine := strings.TrimSpace(line)
 			wsChan <- WebData{LogLine: line}
 			// detect end of execution early
-			if parseLine == o.EndMarker ||
+			if strings.HasPrefix(parseLine, o.EndMarker) ||
 				strings.HasPrefix(parseLine, "Could not boot") {
 				endOfBin()
 			}
