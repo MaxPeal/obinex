@@ -99,7 +99,7 @@ func TestHandleOutput(t *testing.T) {
 	binQueue = []string{"foo"}
 	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
-	c <- o.EndMarker + "\n"
+	c <- o.EndMarker + "0\n"
 	<-eoeChan
 	if len(binQueue) != 0 {
 		t.Errorf("len(binQueue) = %d, expected 0", len(binQueue))
@@ -108,8 +108,8 @@ func TestHandleOutput(t *testing.T) {
 	b, _ := ioutil.ReadAll(f)
 	f.Close()
 	s := string(b)
-	if s != "foo\n"+o.EndMarker+"\n" {
-		t.Errorf("s = %s, expected \"foo\\n%s\\n", s, o.EndMarker)
+	if s != "foo\n"+o.EndMarker+"0\n" {
+		t.Errorf("s = %s, expected \"foo\\n%s0\\n", s, o.EndMarker)
 	}
 
 	// test late detection
