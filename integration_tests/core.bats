@@ -48,6 +48,7 @@ load setup_teardown
 	grep "Watcher: watching mock/in/sub" out_watcher
 
 	cp testbinary.sh mock/in/sub/foo
+	sleep 1
 
 	ls mock/queued/sub/
 	ls mock/executing/sub/

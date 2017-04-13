@@ -22,7 +22,7 @@ load setup_teardown
 @test "output command" {
 	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
-	sleep 3
+	sleep 1
 
 	run_obinex -cmd output testbinary.sh
 	[ "$status" == 0 ]
@@ -32,7 +32,7 @@ load setup_teardown
 @test "userdir" {
 	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
-	sleep 3
+	sleep 1
 
 	run_obinex -cmd output testbinary.sh
 	[ "$status" == 0 ]
