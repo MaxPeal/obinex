@@ -45,6 +45,46 @@ func (b *Buddy) Close() {
 	b.rpc.Close()
 }
 
+func (b *Buddy) Enqueue(path string) bool {
+	if b.Lock.Get(path) {
+		log.Println("Watcher: queueing", path)
+		wp := o.WorkPackage{Path: path}
+		err := wp.ToQueued()
+		if err != nil {
+			log.Println("Error:", err)
+		}
+		b.queue <- wp
+		return true
+	}
+	log.Println("Watcher: blocked", path)
+	return false
+}
+
+func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
+	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Println("Watcher:", err)
+			return err
+		}
+		if path == b.Lock.Path {
+			err := b.Lock.Set()
+			return err
+		}
+		if info.IsDir() == false {
+			b.Enqueue(path)
+			return nil
+		}
+
+		err = watcher.Add(path)
+		if err != nil {
+			log.Println("Watcher: fsnotify error:", err)
+			return nil
+		}
+		log.Println("Watcher: watching " + path)
+		return nil
+	})
+}
+
 func shouldRetry(err error) bool {
 	if err.Error() == "connection is shut down" {
 		return true
@@ -96,28 +136,7 @@ func watchAndRun(buddy *Buddy) error {
 	defer watcher.Close()
 
 	os.MkdirAll(buddy.InDir, 0755)
-	err = filepath.Walk(buddy.InDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			log.Println("Watcher:", err)
-			return err
-		}
-		if path == buddy.Lock.Path {
-			err := buddy.Lock.Set()
-			return err
-		}
-		if info.IsDir() == false {
-			log.Printf("Watcher: not a directory: %s\n", path)
-			return nil
-		}
-
-		err = watcher.Add(path)
-		if err != nil {
-			log.Println("Watcher: fsnotify error:", err)
-			return nil
-		}
-		log.Println("Watcher: watching " + path)
-		return nil
-	})
+	err = buddy.walkAndRun(buddy.InDir, watcher)
 	if err != nil {
 		log.Println(err)
 	}
@@ -139,11 +158,10 @@ func watchAndRun(buddy *Buddy) error {
 					break
 				}
 				if info.IsDir() {
-					err = watcher.Add(event.Name)
+					err = buddy.walkAndRun(event.Name, watcher)
 					if err != nil {
-						log.Println("fsnotify error:", err)
+						log.Println(err)
 					}
-					log.Println("Watcher: watching " + event.Name)
 					break
 				}
 			}
@@ -155,17 +173,7 @@ func watchAndRun(buddy *Buddy) error {
 					}
 					break
 				}
-				if buddy.Lock.Get(event.Name) {
-					log.Println("Watcher: queueing", event.Name)
-					wp := o.WorkPackage{Path: event.Name}
-					err = wp.ToQueued()
-					if err != nil {
-						log.Println("Error:", err)
-					}
-					buddy.queue <- wp
-				} else {
-					log.Println("Watcher: blocked", event.Name)
-				}
+				buddy.Enqueue(event.Name)
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)

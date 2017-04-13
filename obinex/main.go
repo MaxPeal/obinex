@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -19,7 +20,17 @@ var (
 	command  string
 	box      string
 	watchdir string
+	userdir  string
 )
+
+func init() {
+	userdir = "."
+	user, err := user.Current()
+	if err != nil {
+		return
+	}
+	userdir = user.Username
+}
 
 func init() {
 	commands := `
@@ -55,6 +66,7 @@ File system interface:
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")
 	flag.StringVar(&box, "box", o.CurrentBox(), "name of the hardwarebox you want to control")
 	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
+	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
@@ -132,7 +144,9 @@ func CmdLock(args []string) error {
 
 func CmdRun(args []string) error {
 	arg := strings.Join(args, " ")
-	return copyFile(arg, filepath.Join(watchdir, box, "in", filepath.Base(arg)))
+	target := filepath.Join(watchdir, box, "in", userdir, filepath.Base(arg))
+	os.MkdirAll(filepath.Dir(target), 0755)
+	return copyFile(arg, target)
 }
 
 func CmdOutput(args []string) error {
@@ -143,7 +157,7 @@ func CmdOutput(args []string) error {
 	var mostRecentDir string
 	var mostRecentStatus string
 	for _, dir := range []string{"queued", "executing", "out"} {
-		prefix := filepath.Join(boxdir, dir, name) + "_"
+		prefix := filepath.Join(boxdir, dir, userdir, name) + "_"
 		dateDirs, err := filepath.Glob(prefix + "*")
 		if err != nil {
 			return err

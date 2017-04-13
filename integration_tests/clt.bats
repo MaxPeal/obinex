@@ -1,7 +1,7 @@
 load setup_teardown
 
 @test "run command" {
-	run_obinex -cmd run testbinary.sh
+	run_obinex -cmd run -userdir . testbinary.sh
 	[ "$status" -eq 0 ]
 	sleep 0.5
 
@@ -22,9 +22,23 @@ load setup_teardown
 @test "output command" {
 	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
-	sleep 2
+	sleep 3
 
 	run_obinex -cmd output testbinary.sh
 	[ "$status" == 0 ]
 	[ "$output" == "$testbin_output" ]
+}
+
+@test "userdir" {
+	run_obinex -cmd run testbinary.sh
+	[ "$status" == 0 ]
+	sleep 3
+
+	run_obinex -cmd output testbinary.sh
+	[ "$status" == 0 ]
+
+	ls mock/in/$USER
+	ls mock/queued/$USER
+	ls mock/executing/$USER
+	ls mock/out/$USER
 }
