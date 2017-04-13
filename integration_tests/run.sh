@@ -20,11 +20,15 @@ function global_teardown() {
 }
 
 
+success=0
 global_setup
 if [ -z "$@" ]
 then
 	bats .
+	success=$?
 else
 	bats "$@"
+	success=$?
 fi
 global_teardown
+exit $success
