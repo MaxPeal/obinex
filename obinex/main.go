@@ -43,6 +43,8 @@ Commands:
     	submit the binary for execution
   output binary
     	get output for the most recently submitted binary with this name
+  powercycle
+    	cut power to the hardware box, causing it to reboot and execute the next binary
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
@@ -56,7 +58,7 @@ Examples:
 
   To get the output from your last submitted binary, run:
 
-    	obinex -box faui49big01 -cmd output mysubdir/mybin
+    	obinex -box faui49big01 -cmd output mybin
 
 File system interface:
   A lot of obinex actions (some of which are not supported by this tool) can be 
@@ -112,10 +114,11 @@ func copyFile(src, dest string) error {
 type CommandFunction func([]string) error
 
 var Commands map[string]CommandFunction = map[string]CommandFunction{
-	"help":   CmdHelp,
-	"lock":   CmdLock,
-	"run":    CmdRun,
-	"output": CmdOutput,
+	"help":       CmdHelp,
+	"lock":       CmdLock,
+	"run":        CmdRun,
+	"output":     CmdOutput,
+	"powercycle": CmdPowercycle,
 }
 
 func CmdHelp(args []string) error {
@@ -205,6 +208,17 @@ func CmdOutput(args []string) error {
 		log.Println("Your binary is queued.")
 	}
 	return nil
+}
+
+func CmdPowercycle(args []string) error {
+	client, err := rpc.DialHTTP("tcp", o.HostByBox[box]+":12334")
+	if err != nil {
+		return err
+	}
+	var output string
+	err = client.Call("Rpc.Powercycle", struct{}{}, &output)
+	log.Printf(output)
+	return err
 }
 
 func main() {

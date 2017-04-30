@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -49,6 +50,14 @@ func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	<-eoeChan
 	log.Printf("RPC: binary request return: %s\n", wp.Path)
 	return nil
+}
+
+func (r *Rpc) Powercycle(_ struct{}, output *string) error {
+	log.Printf("RPC: powercycle\n")
+	cmd := exec.Command("bash", "-c", o.PowercyclePath)
+	outputRaw, err := cmd.CombinedOutput()
+	*output = string(outputRaw)
+	return err
 }
 
 // binaryServeHandler serves the binaries to the hardware.
