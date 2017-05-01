@@ -25,6 +25,7 @@ type Lock struct {
 	set     bool
 	Path    string
 	unlock  chan bool
+	buddy   *Buddy //this is so we can trigger a walk when the lock expires
 }
 
 func (l Lock) Get(bin string) bool {
@@ -72,6 +73,7 @@ func (l *Lock) Set() error {
 		l.set = false
 		os.Remove(l.Path)
 		log.Println("Lock: unlocked")
+		l.buddy.walkAndRun(l.buddy.InDir, nil)
 	}()
 	log.Println("Lock: locked")
 	return nil

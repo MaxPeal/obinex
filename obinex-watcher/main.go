@@ -75,6 +75,11 @@ func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
 			return nil
 		}
 
+		// If no watcher is given, we only want to enqueue and lock
+		if watcher == nil {
+			return nil
+		}
+
 		err = watcher.Add(path)
 		if err != nil {
 			log.Println("Watcher: fsnotify error:", err)
@@ -185,6 +190,12 @@ func watchAndRun(buddy *Buddy) error {
 	}
 }
 
+func (b *Buddy) InitLock() {
+	b.Lock.set = false
+	b.Lock.Path = filepath.Join(b.InDir, "lock")
+	b.Lock.buddy = b
+}
+
 func main() {
 	flag.Parse()
 	if o.WatchDir[len(o.WatchDir)-1] != '/' {
@@ -198,11 +209,9 @@ func main() {
 			Servername: server,
 			Boxname:    box,
 			InDir:      inDir,
-			Lock: Lock{
-				set:  false,
-				Path: filepath.Join(inDir, "lock")},
-			queue: make(chan o.WorkPackage),
+			queue:      make(chan o.WorkPackage),
 		}
+		buddy.InitLock()
 		buddy.Connect()
 
 		go retryWatchAndRun(buddy, done)
