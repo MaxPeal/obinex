@@ -188,14 +188,15 @@ func CmdOutput(args []string) error {
 		log.Println(dir)
 		prefix := filepath.Join(boxdir, dir, userdir, name) + "_"
 		dateDirs, err := filepath.Glob(prefix + "*")
+		log.Println(dateDirs)
 		if err != nil {
-			log.Println("error")
-			log.Println(err)
 			return err
 		}
 		for _, dd := range dateDirs {
+			log.Println(dd)
 			date, _ := time.Parse(prefix+o.DirectoryDateFormat, dd)
 			if date.After(mostRecentDate) {
+				log.Println("After")
 				mostRecentDate = date
 				mostRecentDir = dd
 				mostRecentStatus = dir
