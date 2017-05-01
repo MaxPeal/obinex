@@ -24,7 +24,7 @@ load setup_teardown
 	[ "$status" == 0 ]
 	sleep 3
 
-	run_obinex -cmd output testbinary.sh
+	run_obinex -cmd output "testbinary.sh"
 	echo "---"
 	echo $output
 	echo "---"

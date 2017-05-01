@@ -179,6 +179,7 @@ func CmdRun(args []string) error {
 func CmdOutput(args []string) error {
 	name := strings.Join(args, " ")
 	boxdir := filepath.Join(watchdir, box)
+	log.Println("Open command executing")
 
 	var mostRecentDate time.Time
 	var mostRecentDir string
