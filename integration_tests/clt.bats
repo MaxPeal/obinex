@@ -22,9 +22,10 @@ load setup_teardown
 @test "output command" {
 	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
-	sleep 2
+	sleep 1
 
 	run_obinex -cmd output testbinary.sh
+	echo $output
 	[ "$status" == 0 ]
 	[ "$output" == "$testbin_output" ]
 }
