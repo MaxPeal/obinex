@@ -202,6 +202,7 @@ func CmdOutput(args []string) error {
 
 	switch mostRecentStatus {
 	case "out":
+		log.Println("Open command in out")
 		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
 		if err != nil {
 			return err
@@ -214,6 +215,7 @@ func CmdOutput(args []string) error {
 		}
 
 	case "executing":
+		log.Println("Open command in executing")
 		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
 		if err != nil {
 			return err
