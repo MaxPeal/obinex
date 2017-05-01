@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/rpc"
 	"os"
@@ -37,8 +38,8 @@ func init() {
 Commands:
   help
     	print this help
-  lock timestring
-    	lock one of the boxes for yourself for the given duration
+  lock [timestring]
+    	lock one of the boxes for yourself for the given duration or give information about the lock
   run binary
     	submit the binary for execution
   output binary
@@ -128,13 +129,35 @@ func CmdHelp(args []string) error {
 
 func CmdLock(args []string) error {
 	arg := strings.Join(args, "")
+	path := filepath.Join(watchdir, box, "in", "lock")
+
+	if arg == "" {
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				log.Printf("No lock")
+				return nil
+			}
+			return err
+		}
+		datestring := strings.TrimSpace(string(content))
+		date, err := time.Parse(time.RFC3339, datestring)
+		if err != nil {
+			format := strings.Replace(time.RFC3339, "T", " ", 1)
+			date, err = time.Parse(format, datestring)
+			if err != nil {
+				return err
+			}
+		}
+		duration := date.Sub(time.Now())
+		log.Printf("Lock expires in %v", duration)
+		return nil
+	}
+
 	duration, err := time.ParseDuration(arg)
 	if err != nil {
 		return err
 	}
-
-	path := filepath.Join(watchdir, box, "in", "lock")
-	log.Println(path)
 
 	f, err := os.Create(path)
 	if err != nil {
@@ -142,6 +165,7 @@ func CmdLock(args []string) error {
 	}
 	f.WriteString(time.Now().Add(duration).Format(time.RFC3339))
 	f.Close()
+	log.Printf("Locked %s for %v", box, duration)
 	return nil
 }
 
