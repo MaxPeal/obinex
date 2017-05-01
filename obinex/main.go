@@ -182,6 +182,7 @@ func CmdOutput(args []string) error {
 	log.Println("Open command executing")
 
 	var mostRecentDate time.Time
+	mostRecentDate = time.Unix(0, 0)
 	var mostRecentDir string
 	var mostRecentStatus string
 	for _, dir := range []string{"queued", "executing", "out"} {
@@ -195,6 +196,7 @@ func CmdOutput(args []string) error {
 		for _, dd := range dateDirs {
 			log.Println(dd)
 			date, _ := time.Parse(prefix+o.DirectoryDateFormat, dd)
+			log.Printf("%#v", date)
 			if date.After(mostRecentDate) {
 				log.Println("After")
 				mostRecentDate = date
