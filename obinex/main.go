@@ -179,26 +179,19 @@ func CmdRun(args []string) error {
 func CmdOutput(args []string) error {
 	name := strings.Join(args, " ")
 	boxdir := filepath.Join(watchdir, box)
-	log.Println("Open command executing")
 
 	var mostRecentDate time.Time
 	var mostRecentDir string
 	var mostRecentStatus string
 	for _, dir := range []string{"queued", "executing", "out"} {
-		log.Println(dir)
 		prefix := filepath.Join(boxdir, dir, userdir, name) + "_"
 		dateDirs, err := filepath.Glob(prefix + "*")
-		log.Println(dateDirs)
 		if err != nil {
 			return err
 		}
 		for _, dd := range dateDirs {
-			log.Println(dd[len(prefix):])
-			log.Println(o.DirectoryDateFormat)
 			date, _ := time.Parse(o.DirectoryDateFormat, dd[len(prefix):])
-			log.Printf("%#v", date)
 			if date.After(mostRecentDate) {
-				log.Println("After")
 				mostRecentDate = date
 				mostRecentDir = dd
 				mostRecentStatus = dir
@@ -208,7 +201,6 @@ func CmdOutput(args []string) error {
 
 	switch mostRecentStatus {
 	case "out":
-		log.Println("Open command in out")
 		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
 		if err != nil {
 			return err
@@ -221,7 +213,6 @@ func CmdOutput(args []string) error {
 		}
 
 	case "executing":
-		log.Println("Open command in executing")
 		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
 		if err != nil {
 			return err
