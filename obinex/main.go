@@ -185,9 +185,12 @@ func CmdOutput(args []string) error {
 	var mostRecentDir string
 	var mostRecentStatus string
 	for _, dir := range []string{"queued", "executing", "out"} {
+		log.Println(dir)
 		prefix := filepath.Join(boxdir, dir, userdir, name) + "_"
 		dateDirs, err := filepath.Glob(prefix + "*")
 		if err != nil {
+			log.Println("error")
+			log.Println(err)
 			return err
 		}
 		for _, dd := range dateDirs {
