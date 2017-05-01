@@ -12,9 +12,13 @@ const PRE = "__obinex-test__"
 
 func createLock(duration time.Duration) *Lock {
 	lockpath := PRE + "testlockfile"
+	dummyBuddy := &Buddy{
+		InDir: "somerandomstringthatishopefullynotadirname",
+	}
 	lock := &Lock{
-		uid:  uint32(os.Getuid()),
-		Path: lockpath,
+		uid:   uint32(os.Getuid()),
+		Path:  lockpath,
+		buddy: dummyBuddy,
 	}
 
 	f, _ := os.Create(lockpath)
