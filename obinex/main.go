@@ -193,8 +193,8 @@ func CmdOutput(args []string) error {
 			return err
 		}
 		for _, dd := range dateDirs {
-			log.Println(dd)
-			log.Println(prefix + o.DirectoryDateFormat)
+			log.Println(dd[len(prefix):])
+			log.Println(o.DirectoryDateFormat)
 			date, _ := time.Parse(o.DirectoryDateFormat, dd[len(prefix):])
 			log.Printf("%#v", date)
 			if date.After(mostRecentDate) {
