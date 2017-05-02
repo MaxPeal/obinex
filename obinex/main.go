@@ -203,6 +203,9 @@ func CmdOutput(args []string) error {
 	case "out":
 		outFile, err := os.Open(filepath.Join(mostRecentDir, "output.txt"))
 		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
 			return err
 		}
 		defer outFile.Close()
