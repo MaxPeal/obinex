@@ -44,8 +44,8 @@ Commands:
     	submit the binary for execution
   output binary
     	get output for the most recently submitted binary with this name
-  powercycle
-    	cut power to the hardware box, causing it to reboot and execute the next binary
+  reset
+    	reset the hardware box, causing it to reboot and execute the next binary
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
@@ -115,11 +115,11 @@ func copyFile(src, dest string) error {
 type CommandFunction func([]string) error
 
 var Commands map[string]CommandFunction = map[string]CommandFunction{
-	"help":       CmdHelp,
-	"lock":       CmdLock,
-	"run":        CmdRun,
-	"output":     CmdOutput,
-	"powercycle": CmdPowercycle,
+	"help":   CmdHelp,
+	"lock":   CmdLock,
+	"run":    CmdRun,
+	"output": CmdOutput,
+	"reset":  CmdReset,
 }
 
 func CmdHelp(args []string) error {
@@ -234,7 +234,7 @@ func CmdOutput(args []string) error {
 	return nil
 }
 
-func CmdPowercycle(args []string) error {
+func CmdReset(args []string) error {
 	client, err := rpc.DialHTTP("tcp", o.HostByBox[box]+":12334")
 	if err != nil {
 		return err
