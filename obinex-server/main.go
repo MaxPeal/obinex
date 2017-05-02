@@ -113,7 +113,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	n, err := io.Copy(w, f)
 	log.Printf("Server: served %dbytes", n)
 	if err != nil {
-		panic(err)
+		log.Printf("Server: error (ignored): %s\n", err)
 	}
 	log.Printf("Server: binary served\n")
 }
