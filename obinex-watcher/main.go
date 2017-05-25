@@ -36,9 +36,12 @@ func (b *Buddy) Connect() error {
 	return nil
 }
 
-func (b *Buddy) Run(wp o.WorkPackage) error {
+func (b *Buddy) Run(wp o.WorkPackage) {
 	err := b.rpc.Call("Rpc.Run", wp, nil)
-	return err
+	if err != nil {
+		log.Println("RPC:", err)
+	}
+	wp.ToOut()
 }
 
 func (b *Buddy) Close() {
@@ -106,6 +109,7 @@ func shouldRetry(err error) bool {
 
 func retryWatchAndRun(buddy *Buddy, done chan bool) {
 	defer func() { done <- true }()
+	go buddy.RunQueue()
 	err := watchAndRun(buddy)
 	for shouldRetry(err) {
 		log.Println("Connection error, retrying...")
@@ -116,23 +120,14 @@ func retryWatchAndRun(buddy *Buddy, done chan bool) {
 	return
 }
 
-func watchAndRun(buddy *Buddy) error {
-	// Send the buddy.queued binaries to the server one after another
-	// This function is currently located here because of the shutdown
-	// channel.
-	shutdown := make(chan error)
-	go func(buddy *Buddy) {
-		for wp := range buddy.queue {
-			wp.ToExecuting()
-			err := buddy.Run(wp)
-			if err != nil {
-				shutdown <- err
-				return
-			}
-			wp.ToOut()
-		}
-	}(buddy)
+func (b *Buddy) RunQueue() {
+	for wp := range b.queue {
+		wp.ToExecuting()
+		go b.Run(wp)
+	}
+}
 
+func watchAndRun(buddy *Buddy) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Println("Watcher:", err)
@@ -182,8 +177,6 @@ func watchAndRun(buddy *Buddy) error {
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
-		case err := <-shutdown:
-			return err
 		case <-killChan:
 			return errors.New("Terminated by signal.")
 		}
