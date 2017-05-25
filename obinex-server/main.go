@@ -44,7 +44,7 @@ type Rpc struct{}
 func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", wp.Path)
 	boxname := o.CurrentBox()
-	binQueue = append(binQueue, wp.Path[len(o.WatchDir)+len(boxname)+4:])
+	binQueue = append(binQueue, wp.Path[len(o.WatchDir)+len(boxname)+11:])
 	wsChan <- WebData{Queue: binQueue}
 	runToServChan <- wp
 	<-eoeChan
