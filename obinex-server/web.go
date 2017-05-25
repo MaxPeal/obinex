@@ -71,8 +71,11 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		Hostname    string
 		HardwareBox string
 	}{
-		Hostname:    hostname,
-		HardwareBox: o.ControlHosts[hostname],
+		Hostname:    hostname + ".informatik.uni-erlangen.de",
+		HardwareBox: o.BoxByHost(hostname),
+	}
+	if data.HardwareBox == "mock" {
+		data.Hostname = "localhost"
 	}
 	err = t.Execute(w, data)
 	if err != nil {
