@@ -212,6 +212,7 @@ func main() {
 	http.HandleFunc("/"+box, binaryServeHandler)
 	http.HandleFunc("/", weblogHandler)
 	http.Handle("/logws", websocket.Handler(websocketHandler))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
 	c := make(chan string, 10)
 	go getSerialOutput(c)
 	go handleOutput(c)

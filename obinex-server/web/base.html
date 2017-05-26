@@ -3,6 +3,8 @@
 	<meta charset="utf-8">
 	<title>Obinex Log</title>
 
+	<link rel="stylesheet" href="static/css/bootstrap.css" />
+
 	<script type="text/javascript" charset="utf-8">
 
 var ws = new WebSocket("ws://{{.Hostname}}:12334/logws");
@@ -14,7 +16,7 @@ ws.onmessage = function(evt) {
 	if (msg.Queue) {
 		document.getElementById("queue").innerHTML = "";
 		for (var i in msg.Queue) {
-			document.getElementById("queue").innerHTML += msg.Queue[i] + "\n";
+			document.getElementById("queue").innerHTML += "<li class='list-group-item'>" + msg.Queue[i] + "</li>\n";
 		}
 	}
 };
@@ -22,10 +24,8 @@ ws.onmessage = function(evt) {
 	</script>
 </head>
 <body>
-<h1>{{.HardwareBox}}</h1>
-<h2>Queue:</h2>
-	<pre id="queue"></pre>
-<h2>Live output:</h2>
-	<pre id="log"></pre>
+	<div class="container">
+		{{template "content" .}}
+	</div>
 </body>
 </html>

@@ -1,0 +1,17 @@
+{{define "content"}}
+<ul class="nav nav-tabs" style="margin-top: 5px; margin-bottom: 5px;">
+	<li class="nav-item">
+		<a class="nav-link active" href="#">{{.HardwareBox}}</a>
+	</li>
+</ul>
+<div class="row">
+	<div class="col-md-4">
+		<h3>Queue</h3>
+		<ul id="queue" class="list-group"></ul>
+	</div>
+	<div class="col-md-8">
+		<h3>Live output</h3>
+		<pre id="log" class="pre-scrollable" style="background-color:#ddd;"></pre>
+	</div>
+</div>
+{{end}}

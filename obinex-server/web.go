@@ -57,7 +57,7 @@ func Broadcast(c chan WebData) chan<- chan WebData {
 
 // weblogHandler serves the website to view the logfile.
 func weblogHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("weblog.html")
+	t, err := template.ParseFiles("web/base.html", "web/status.html")
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
