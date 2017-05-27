@@ -227,12 +227,20 @@ func main() {
 		Addr: ":12334",
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			addr := req.RemoteAddr
-			if !(strings.HasPrefix(addr, "[::1]") || strings.HasPrefix(addr, "127.0.0.1") || strings.HasPrefix(addr, "131.188.42.")) {
-				http.Error(w, "Blocked", 401)
-				log.Printf("Blocked access from %s\n", addr)
+			// allow the following addrs to access every path
+			if strings.HasPrefix(addr, "121.188.42.") ||
+				strings.HasPrefix(addr, "[::1]") ||
+				strings.HasPrefix(addr, "127.0.0.1") ||
+				// allow these paths from everywhere
+				req.URL.Path == "/" ||
+				req.URL.Path == "/logws" ||
+				strings.HasPrefix(req.URL.Path, "/static/") {
+
+				http.DefaultServeMux.ServeHTTP(w, req)
 				return
 			}
-			http.DefaultServeMux.ServeHTTP(w, req)
+			http.Error(w, "Blocked", 401)
+			log.Printf("Blocked access from %s\n", addr)
 		}),
 	}
 	log.Printf("Server: %s serving %s\n", hostname, box)
