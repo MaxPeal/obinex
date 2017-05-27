@@ -228,7 +228,7 @@ func main() {
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			addr := req.RemoteAddr
 			// allow the following addrs to access every path
-			if strings.HasPrefix(addr, "121.188.42.") ||
+			if strings.HasPrefix(addr, "131.188.42.") ||
 				strings.HasPrefix(addr, "[::1]") ||
 				strings.HasPrefix(addr, "127.0.0.1") ||
 				// allow these paths from everywhere
