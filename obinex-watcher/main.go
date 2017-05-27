@@ -37,6 +37,10 @@ func (b *Buddy) Connect() error {
 }
 
 func (b *Buddy) Run(wp o.WorkPackage) {
+	if b.rpc == nil {
+		log.Println("RPC: not connected yet")
+		return
+	}
 	err := b.rpc.Call("Rpc.Run", wp, nil)
 	if err != nil {
 		log.Println("RPC:", err)
@@ -216,7 +220,12 @@ func main() {
 			queue:      make(chan o.WorkPackage),
 		}
 		buddy.InitLock()
-		buddy.Connect()
+		err := buddy.Connect()
+		for err != nil {
+			log.Println("RPC:", err)
+			time.Sleep(time.Second)
+			err = buddy.Connect()
+		}
 
 		go retryWatchAndRun(buddy, done)
 	}
