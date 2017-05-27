@@ -19,6 +19,8 @@ var (
 	wsAddChan = Broadcast(wsChan)
 )
 
+// initialWebData holds the status information a user sees when first connecting
+// to the website.
 var initialWebData o.WebData
 
 // Broadcast enables multiple reads from a channel.
