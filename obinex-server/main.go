@@ -24,10 +24,6 @@ import (
 // testDone is used by the testsuite
 var testDone = make(chan bool, 1)
 
-// binQueue lists all queued binaries.
-// This is non-functional purely for logging etc.
-var binQueue []string
-
 // Channels for synchronizing Run calls
 var (
 	runToServChan = make(chan o.WorkPackage)
@@ -44,8 +40,8 @@ type Rpc struct{}
 func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", wp.Path)
 	boxname := o.CurrentBox()
-	binQueue = append(binQueue, wp.Path[len(o.WatchDir)+len(boxname)+11:])
-	wsChan <- WebData{Queue: binQueue}
+	initialWebData.Queue = append(initialWebData.Queue, wp.Path[len(o.WatchDir)+len(boxname)+11:])
+	wsChan <- initialWebData
 	runToServChan <- wp
 	<-eoeChan
 	log.Printf("RPC: binary request return: %s\n", wp.Path)
@@ -58,6 +54,13 @@ func (r *Rpc) Powercycle(_ struct{}, output *string) error {
 	outputRaw, err := cmd.CombinedOutput()
 	*output = string(outputRaw)
 	return err
+}
+
+// UpdateWebView allows obinex-watcher to send data to the web status page.
+func (r *Rpc) UpdateWebView(wd o.WebData, _ *struct{}) error {
+	initialWebData.Lock = wd.Lock
+	wsChan <- initialWebData
+	return nil
 }
 
 // binaryServeHandler serves the binaries to the hardware.
@@ -157,10 +160,10 @@ func handleOutput(c chan string) {
 	var f *os.File
 	var err error
 	endOfBin := func() {
-		if len(binQueue) > 0 {
-			binQueue = binQueue[1:]
+		if len(initialWebData.Queue) > 0 {
+			initialWebData.Queue = initialWebData.Queue[1:]
 		}
-		wsChan <- WebData{Queue: binQueue}
+		wsChan <- initialWebData
 		eoeChan <- struct{}{}
 		if f != nil {
 			f.Close()
@@ -176,7 +179,7 @@ func handleOutput(c chan string) {
 				}
 			}
 			parseLine := strings.TrimSpace(line)
-			wsChan <- WebData{LogLine: line}
+			wsChan <- o.WebData{LogLine: line}
 			// detect end of execution early
 			if strings.HasPrefix(parseLine, o.EndMarker) ||
 				strings.HasPrefix(parseLine, "Could not boot") {

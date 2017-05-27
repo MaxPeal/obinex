@@ -19,6 +19,13 @@ ws.onmessage = function(evt) {
 			document.getElementById("queue").innerHTML += "<li class='list-group-item'>" + msg.Queue[i] + "</li>\n";
 		}
 	}
+	var warningBox = document.getElementById("warning-card")
+	document.getElementById("warning-block").innerHTML = msg.Lock;
+	if (msg.Lock) {
+		warningBox.style.display = "block";
+	} else {
+		warningBox.style.display = "none";
+	}
 };
 
 	</script>

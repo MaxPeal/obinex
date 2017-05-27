@@ -92,17 +92,17 @@ func TestHandleOutput(t *testing.T) {
 	defer func() { testDone <- true }()
 	defer os.Remove("output.txt")
 
-	outputChan := make(chan WebData)
+	outputChan := make(chan o.WebData)
 	wsAddChan <- outputChan
 
 	// test normal operation
-	binQueue = []string{"foo"}
+	initialWebData.Queue = []string{"foo"}
 	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	c <- o.EndMarker + "0\n"
 	<-eoeChan
-	if len(binQueue) != 0 {
-		t.Errorf("len(binQueue) = %d, expected 0", len(binQueue))
+	if len(initialWebData.Queue) != 0 {
+		t.Errorf("len(initialWebData.Queue) = %d, expected 0", len(initialWebData.Queue))
 	}
 	f, _ := os.Open("output.txt")
 	b, _ := ioutil.ReadAll(f)
@@ -113,13 +113,13 @@ func TestHandleOutput(t *testing.T) {
 	}
 
 	// test late detection
-	binQueue = []string{"foo"}
+	initialWebData.Queue = []string{"foo"}
 	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	lateEoeChan <- struct{}{}
 	<-eoeChan
-	if len(binQueue) != 0 {
-		t.Errorf("len(binQueue) = %d, expected 0", len(binQueue))
+	if len(initialWebData.Queue) != 0 {
+		t.Errorf("len(initialWebData.Queue) = %d, expected 0", len(initialWebData.Queue))
 	}
 	f, _ = os.Open("output.txt")
 	b, _ = ioutil.ReadAll(f)
@@ -138,24 +138,24 @@ func TestRun(t *testing.T) {
 	defer func() { o.ControlHosts = oldHosts }()
 
 	rpc := Rpc{}
-	in := o.WatchDir + "somebox/in/somedir/somebin"
+	in := o.WatchDir + "somebox/executing/somedir/somebin"
 	done := make(chan bool)
 	err := error(nil)
 
 	go func() { err = rpc.Run(o.WorkPackage{Path: in}, nil); done <- true }()
-	defer func() { binQueue = []string{} }()
+	defer func() { initialWebData.Queue = []string{} }()
 	wp := <-runToServChan
 	eoeChan <- struct{}{}
 	<-done
 
-	if wp.Path != o.WatchDir+"somebox/in/somedir/somebin" {
-		t.Errorf("bin = %s, want somebin", o.WatchDir+"somebox/in/somedir/somebin")
+	if wp.Path != o.WatchDir+"somebox/executing/somedir/somebin" {
+		t.Errorf("bin = %s, want somebin", o.WatchDir+"somebox/executing/somedir/somebin")
 	}
 	if err != nil {
 		t.Errorf("error = %s, want nil", err)
 	}
-	if binQueue[0] != "somedir/somebin" {
-		t.Errorf("binQueue = %v, want somedir/somebin", binQueue)
+	if initialWebData.Queue[0] != "somedir/somebin" {
+		t.Errorf("initialWebData.Queue = %v, want somedir/somebin", initialWebData.Queue)
 	}
 }
 
@@ -174,21 +174,21 @@ func TestWebsocket(t *testing.T) {
 	}
 	defer conn2.Close()
 
-	wsChan <- WebData{}
+	wsChan <- o.WebData{}
 
 	var buf = make([]byte, 512)
 	var n int
 	if n, err = conn1.Read(buf); err != nil {
 		log.Fatal(err)
 	}
-	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[]}" {
-		t.Errorf("output = %s, want empty WebData", string(buf[:n]))
+	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[],\"Lock\":\"\"}" {
+		t.Errorf("output = %s, want empty o.WebData", string(buf[:n]))
 	}
 
 	if n, err = conn2.Read(buf); err != nil {
 		log.Fatal(err)
 	}
-	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[]}" {
-		t.Errorf("output = %s, want empty WebData", string(buf[:n]))
+	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[],\"Lock\":\"\"}" {
+		t.Errorf("output = %s, want empty o.WebData", string(buf[:n]))
 	}
 }

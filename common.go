@@ -5,14 +5,35 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
 
+// WebData should be used to send data via the websocket
+type WebData struct {
+	LogLine string
+	Queue   []string
+	Lock    string
+}
+
 type WorkPackage struct {
 	Path     string
 	Checksum [md5.Size]byte
+}
+
+func Username(uid uint32) string {
+	username := "unknown"
+	u, err := user.LookupId(strconv.Itoa(int(uid)))
+	if err == nil {
+		username = u.Username
+	} else {
+		log.Println("Couldn't get username:")
+		log.Println(err)
+	}
+	return username
 }
 
 func changeStateOnPath(path, state string) string {

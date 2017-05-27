@@ -13,26 +13,22 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-// WebData should be used to send data via the websocket
-type WebData struct {
-	LogLine string
-	Queue   []string
-}
-
 // Channels for weblog output via websocket
 var (
-	wsChan    = make(chan WebData)
+	wsChan    = make(chan o.WebData)
 	wsAddChan = Broadcast(wsChan)
 )
+
+var initialWebData o.WebData
 
 // Broadcast enables multiple reads from a channel.
 // Subscribe by sending a channel into the returned Channel. The subscribed
 // channel will now receive all messages sent into the original channel (c).
 // TODO: see if possible to make generic for common.go
-func Broadcast(c chan WebData) chan<- chan WebData {
-	cNewChans := make(chan chan WebData)
+func Broadcast(c chan o.WebData) chan<- chan o.WebData {
+	cNewChans := make(chan chan o.WebData)
 	go func() {
-		var cs []chan WebData
+		var cs []chan o.WebData
 		for {
 			select {
 			case newChan := <-cNewChans:
@@ -86,11 +82,11 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 // websocketHandler sends log data to the javascript website
 func websocketHandler(ws *websocket.Conn) {
 	log.Printf("Web: connection to websocket")
-	// immediately show queue on website
-	websocket.JSON.Send(ws, WebData{Queue: binQueue})
+	// show initial information on website
+	websocket.JSON.Send(ws, initialWebData)
 	// give the channel some buffer to avoid message loss (see also comment
 	// about blocking in Broadcast
-	c := make(chan WebData, 10)
+	c := make(chan o.WebData, 10)
 	wsAddChan <- c
 	for {
 		wd := <-c

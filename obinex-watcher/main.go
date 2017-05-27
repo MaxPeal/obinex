@@ -44,6 +44,17 @@ func (b *Buddy) Run(wp o.WorkPackage) {
 	wp.ToOut()
 }
 
+func (b *Buddy) UpdateWebView(wd o.WebData) {
+	if b.rpc == nil {
+		log.Println("RPC: not connected yet")
+		return
+	}
+	err := b.rpc.Call("Rpc.UpdateWebView", wd, nil)
+	if err != nil {
+		log.Println("RPC:", err)
+	}
+}
+
 func (b *Buddy) Close() {
 	b.rpc.Close()
 }

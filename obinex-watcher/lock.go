@@ -8,6 +8,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	o "gitlab.cs.fau.de/luksen/obinex"
 )
 
 func getUid(path string) (uint32, error) {
@@ -72,9 +74,12 @@ func (l *Lock) Set() error {
 		}
 		l.set = false
 		os.Remove(l.Path)
+		l.buddy.UpdateWebView(o.WebData{Lock: ""})
 		log.Println("Lock: unlocked")
 		l.buddy.walkAndRun(l.buddy.InDir, nil)
 	}()
+
+	l.buddy.UpdateWebView(o.WebData{Lock: "This machine is locked by " + o.Username(l.uid) + "."})
 	log.Println("Lock: locked")
 	return nil
 }
