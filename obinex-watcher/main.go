@@ -63,19 +63,19 @@ func (b *Buddy) Close() {
 	b.rpc.Close()
 }
 
-func (b *Buddy) Enqueue(path string) bool {
+func (b *Buddy) Enqueue(path string) {
 	if b.Lock.Get(path) {
 		log.Println("Watcher: queueing", path)
 		wp := o.WorkPackage{Path: path}
 		err := wp.ToQueued()
 		if err != nil {
 			log.Println("Error:", err)
+			return
 		}
 		b.queue <- wp
-		return true
+		return
 	}
 	log.Println("Watcher: blocked", path)
-	return false
 }
 
 func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {

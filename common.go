@@ -52,6 +52,18 @@ func changeStateOnPath(path, state string) string {
 func (wp *WorkPackage) ToQueued() error {
 	// Set the checksum
 	f, err := os.Open(wp.Path)
+	// Sometimes there is a delay before we can access the file via NFS, so
+	// we wait up to a second before erroring out.
+	i := 10
+	for err != nil {
+		i -= 1
+		if i == -1 {
+			break
+		}
+		log.Printf("Watcher: file access problem, retrying...\n")
+		time.Sleep(100 * time.Millisecond)
+		f, err = os.Open(wp.Path)
+	}
 	if err != nil {
 		return err
 	}
