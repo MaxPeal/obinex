@@ -15,7 +15,7 @@ ws.onmessage = function(evt) {
 		var scroll = false;
 		// If we are currently scrolled to the bottom, we are going to
 		// scroll to bottom after adding the new line as well.
-		if (log.scrollTop === (log.scrollHeight - log.offsetHeight)) {
+		if (log.scrollHeight - log.offsetHeight - log.scrollTop < 1) {
 			scroll = true;
 		}
 		log.innerHTML += msg.LogLine;
