@@ -11,7 +11,17 @@ var ws = new WebSocket("ws://{{.Hostname}}:12334/logws");
 ws.onmessage = function(evt) {
 	var msg = JSON.parse(evt.data);
 	if (msg.LogLine) {
-		document.getElementById("log").innerHTML += msg.LogLine;
+		var log = document.getElementById("log");
+		var scroll = false;
+		// If we are currently scrolled to the bottom, we are going to
+		// scroll to bottom after adding the new line as well.
+		if (log.scrollTop === (log.scrollHeight - log.offsetHeight)) {
+			scroll = true;
+		}
+		log.innerHTML += msg.LogLine;
+		if (scroll) {
+			log.scrollTop = log.scrollHeight;
+		}
 	}
 	if (msg.Queue) {
 		document.getElementById("queue").innerHTML = "";
