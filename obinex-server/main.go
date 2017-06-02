@@ -239,7 +239,7 @@ func main() {
 				http.DefaultServeMux.ServeHTTP(w, req)
 				return
 			}
-			http.Error(w, "Blocked", 401)
+			http.Error(w, "", 404)
 			log.Printf("Blocked access from %s\n", addr)
 		}),
 	}
