@@ -3,12 +3,15 @@ package main
 import (
 	"errors"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -21,6 +24,7 @@ type Buddy struct {
 	Servername string
 	InDir      string
 	Lock       Lock
+	ModePath   string
 	queue      chan o.WorkPackage
 	rpc        *rpc.Client
 }
@@ -78,6 +82,23 @@ func (b *Buddy) Enqueue(path string) {
 	log.Println("Watcher: blocked", path)
 }
 
+func (b *Buddy) SetBootMode(mode string) {
+	if mode != "linux" &&
+		mode != "batch" &&
+		mode != "nfs" &&
+		mode != "interactive" {
+		log.Printf("Invalid mode \"%s\". Mode not changed.\n", mode)
+		return
+	}
+	cmd := exec.Command("bash", "-c", o.BootModePath, b.Boxname, mode)
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Println("mode error:", err)
+		log.Println("Mode not changed.")
+	}
+	log.Printf("Mode changed to \"%s\"\n", mode)
+}
+
 func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
 	return filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -87,6 +108,12 @@ func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
 		if path == b.Lock.Path {
 			err := b.Lock.Set()
 			return err
+		}
+		// Mode changes are only done via file event, not in the
+		// initial walk since that would lead to unnecessary mode
+		// changes.
+		if path == b.ModePath {
+			return nil
 		}
 		if info.IsDir() == false {
 			b.Enqueue(path)
@@ -165,6 +192,9 @@ func watchAndRun(buddy *Buddy) error {
 				if event.Name == buddy.Lock.Path {
 					buddy.Lock.Unset()
 				}
+				if event.Name == buddy.ModePath {
+					buddy.SetBootMode("batch")
+				}
 			}
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				info, err := os.Stat(event.Name)
@@ -186,9 +216,18 @@ func watchAndRun(buddy *Buddy) error {
 					if err != nil {
 						log.Println("lock error:", err)
 					}
-					break
+				} else if event.Name == buddy.ModePath {
+					modeRaw, err := ioutil.ReadFile(buddy.ModePath)
+					if err != nil {
+						log.Println("mode error:", err)
+						break
+					}
+					mode := string(modeRaw)
+					mode = strings.TrimSpace(mode)
+					buddy.SetBootMode(mode)
+				} else {
+					buddy.Enqueue(event.Name)
 				}
-				buddy.Enqueue(event.Name)
 			}
 		case err := <-watcher.Errors:
 			log.Println("fsnotify error:", err)
@@ -218,6 +257,7 @@ func main() {
 			Boxname:    box,
 			InDir:      inDir,
 			queue:      make(chan o.WorkPackage),
+			ModePath:   filepath.Join(inDir, "mode"),
 		}
 		buddy.InitLock()
 		err := buddy.Connect()

@@ -116,6 +116,9 @@ func (wp *WorkPackage) ToOut() {
 // PowercyclePath is the location of the powercycle script
 const PowercyclePath = "/proj/i4invasic/bin/powerCycle.sh"
 
+// BootModePath points to the script that changes boot mode
+const BootModePath = "./test.sh"
+
 // DirecotryDateFormat is the format string used for timestamps in binary
 // directries
 const DirectoryDateFormat = "2006_01_02_-_15_04_05.000000000"
