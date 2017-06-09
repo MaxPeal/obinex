@@ -90,13 +90,14 @@ func (b *Buddy) SetBootMode(mode string) {
 		log.Printf("Invalid mode \"%s\". Mode not changed.\n", mode)
 		return
 	}
-	cmd := exec.Command("bash", "-c", o.BootModePath, b.Boxname, mode)
+	cmd := exec.Command("bash", "-c", o.BootModePath+" "+b.Boxname+" "+mode)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println("mode error:", err)
+		log.Printf("mode error (%s -> %s): %s\n", b.Boxname, mode, err)
 		log.Println("Mode not changed.")
+		return
 	}
-	log.Printf("Mode changed to \"%s\"\n", mode)
+	log.Printf("%s mode changed to \"%s\"\n", b.Boxname, mode)
 }
 
 func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
