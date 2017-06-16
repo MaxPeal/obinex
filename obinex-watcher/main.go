@@ -90,14 +90,20 @@ func (b *Buddy) SetBootMode(mode string) {
 		log.Printf("Invalid mode \"%s\". Mode not changed.\n", mode)
 		return
 	}
+	log.Printf("Changing %s mode to \"%s\"\n", b.Boxname, mode)
+
+	if !b.Lock.Get(b.ModePath) {
+		log.Println("Mode change denied by lock. If you are the owner of the lock, try removing the mode file first.")
+		return
+	}
+
 	cmd := exec.Command("bash", "-c", o.BootModePath+" "+b.Boxname+" "+mode)
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("mode error (%s -> %s): %s\n", b.Boxname, mode, err)
-		log.Println("Mode not changed.")
+		log.Println("mode error:", err)
 		return
 	}
-	log.Printf("%s mode changed to \"%s\"\n", b.Boxname, mode)
+	log.Println("Mode changed.")
 }
 
 func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
@@ -192,9 +198,6 @@ func watchAndRun(buddy *Buddy) error {
 			if event.Op&fsnotify.Remove == fsnotify.Remove {
 				if event.Name == buddy.Lock.Path {
 					buddy.Lock.Unset()
-				}
-				if event.Name == buddy.ModePath {
-					buddy.SetBootMode("batch")
 				}
 			}
 			if event.Op&fsnotify.Create == fsnotify.Create {

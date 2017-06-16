@@ -92,3 +92,7 @@ func (l Lock) Unset() {
 		break
 	}
 }
+
+func (l Lock) IsSet() bool {
+	return l.set
+}
