@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -40,12 +41,14 @@ Commands:
     	print this help
   lock [timestring]
     	lock one of the boxes for yourself for the given duration or give information about the lock
-  run binary
+  run <binary>
     	submit the binary for execution
-  output binary
+  output <binary>
     	get output for the most recently submitted binary with this name
-  reset
+  reset (not implemented)
     	reset the hardware box, causing it to reboot and execute the next binary
+  mode [linux|batch|nfs|interactive]
+    	set the boot mode for a hardware box
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
@@ -120,6 +123,7 @@ var Commands map[string]CommandFunction = map[string]CommandFunction{
 	"run":    CmdRun,
 	"output": CmdOutput,
 	"reset":  CmdReset,
+	"mode":   CmdMode,
 }
 
 func CmdHelp(args []string) error {
@@ -245,6 +249,24 @@ func CmdReset(args []string) error {
 	var output string
 	err = client.Call("Rpc.Powercycle", struct{}{}, &output)
 	log.Printf(output)
+	return err
+}
+
+func CmdMode(args []string) error {
+	arg := strings.Join(args, " ")
+	if arg != "linux" &&
+		arg != "batch" &&
+		arg != "nfs" &&
+		arg != "interactive" {
+		return errors.New("Invalid mode. Use linux, batch, nfs or interactive.")
+	}
+	path := filepath.Join(watchdir, box, "in", "mode")
+	os.Remove(path)
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(arg)
 	return err
 }
 
