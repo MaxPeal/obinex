@@ -17,6 +17,7 @@ type WebData struct {
 	LogLine string
 	Queue   []string
 	Lock    string
+	Mode    string
 }
 
 type WorkPackage struct {

@@ -103,6 +103,7 @@ func (b *Buddy) SetBootMode(mode string) {
 		log.Println("mode error:", err)
 		return
 	}
+	b.UpdateWebView(o.WebData{Mode: mode})
 	log.Println("Mode changed.")
 }
 
@@ -272,6 +273,7 @@ func main() {
 		}
 
 		go retryWatchAndRun(buddy, done)
+		buddy.UpdateWebView(o.WebData{Mode: "batch"})
 	}
 	for range Servers {
 		<-done

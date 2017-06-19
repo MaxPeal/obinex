@@ -59,6 +59,9 @@ func (r *Rpc) Powercycle(_ struct{}, output *string) error {
 // UpdateWebView allows obinex-watcher to send data to the web status page.
 func (r *Rpc) UpdateWebView(wd o.WebData, _ *struct{}) error {
 	initialWebData.Lock = wd.Lock
+	if wd.Mode != "" {
+		initialWebData.Mode = wd.Mode
+	}
 	wsChan <- initialWebData
 	return nil
 }

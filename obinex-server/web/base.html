@@ -36,6 +36,15 @@ ws.onmessage = function(evt) {
 	} else {
 		warningBox.style.display = "none";
 	}
+	if (msg.Mode) {
+		var text = " (mode: ";
+		if (msg.Mode == "batch") {
+			text = "";
+		} else {
+			text = text + msg.Mode + ")";
+		}
+		document.getElementById("mode").innerHTML = text;
+	}
 };
 
 	</script>
