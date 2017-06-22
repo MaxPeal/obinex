@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strconv"
@@ -23,6 +24,15 @@ type WebData struct {
 type WorkPackage struct {
 	Path     string
 	Checksum [md5.Size]byte
+}
+
+// ExecCommand is a simple wrapper around a common usage of exec.Command.
+// Having this in a separate function also allows us to mock this function for
+// testing.
+var ExecCommand = func(cmd string, args ...string) (output []byte, err error) {
+	c := exec.Command(cmd, args...)
+	output, err = c.CombinedOutput()
+	return
 }
 
 func Username(uid uint32) string {

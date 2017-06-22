@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/rpc"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
@@ -97,8 +96,7 @@ func (b *Buddy) SetBootMode(mode string) {
 		return
 	}
 
-	cmd := exec.Command("bash", "-c", o.BootModePath+" "+b.Boxname+" "+mode)
-	_, err := cmd.CombinedOutput()
+	_, err := o.ExecCommand("bash", "-c", o.BootModePath+" "+b.Boxname+" "+mode)
 	if err != nil {
 		log.Println("mode error:", err)
 		return
