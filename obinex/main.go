@@ -47,7 +47,7 @@ Commands:
     	get output for the most recently submitted binary with this name
   reset (not implemented)
     	reset the hardware box, causing it to reboot and execute the next binary
-  mode [linux|batch|nfs|interactive]
+  mode [linux|batch]
     	set the boot mode for a hardware box
 
 Timestring:

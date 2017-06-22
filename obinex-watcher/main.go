@@ -83,9 +83,7 @@ func (b *Buddy) Enqueue(path string) {
 
 func (b *Buddy) SetBootMode(mode string) {
 	if mode != "linux" &&
-		mode != "batch" &&
-		mode != "nfs" &&
-		mode != "interactive" {
+		mode != "batch" {
 		log.Printf("Invalid mode \"%s\". Mode not changed.\n", mode)
 		return
 	}
