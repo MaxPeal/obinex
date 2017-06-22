@@ -65,9 +65,9 @@ Examples:
     	obinex -box faui49big01 -cmd output mybin
 
 File system interface:
-  A lot of obinex actions (some of which are not supported by this tool) can be 
-  executed through the file system at 'watchdir' (/proj/i4obinex/). See
-  README.md or gitlab.cs.fau.de/luksen/obinex for documentation.
+  A lot of obinex actions can be executed through the file system at 'watchdir'
+  (/proj/i4obinex/). See README.md or gitlab.cs.fau.de/luksen/obinex for
+  documentation.
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")
 	flag.StringVar(&box, "box", o.CurrentBox(), "name of the hardwarebox you want to control")
