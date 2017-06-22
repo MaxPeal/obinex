@@ -253,6 +253,7 @@ func main() {
 			Servername: server,
 			Boxname:    box,
 			InDir:      inDir,
+			Lock:       &Lock{},
 			queue:      make(chan o.WorkPackage),
 			ModePath:   filepath.Join(inDir, "mode"),
 		}
