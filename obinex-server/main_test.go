@@ -18,6 +18,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const emptyWebDataString = "{\"LogLine\":\"\",\"Queue\":[],\"Lock\":\"\",\"Mode\":\"\"}"
+
 func TestBinaryServeHandler(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -181,14 +183,14 @@ func TestWebsocket(t *testing.T) {
 	if n, err = conn1.Read(buf); err != nil {
 		log.Fatal(err)
 	}
-	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[],\"Lock\":\"\"}" {
+	if string(buf[:n]) != emptyWebDataString {
 		t.Errorf("output = %s, want empty o.WebData", string(buf[:n]))
 	}
 
 	if n, err = conn2.Read(buf); err != nil {
 		log.Fatal(err)
 	}
-	if string(buf[:n]) != "{\"LogLine\":\"\",\"Queue\":[],\"Lock\":\"\"}" {
+	if string(buf[:n]) != emptyWebDataString {
 		t.Errorf("output = %s, want empty o.WebData", string(buf[:n]))
 	}
 }
