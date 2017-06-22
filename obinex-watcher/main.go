@@ -22,7 +22,7 @@ type Buddy struct {
 	Boxname    string
 	Servername string
 	InDir      string
-	Lock       Lock
+	Lock       Locker
 	ModePath   string
 	queue      chan o.WorkPackage
 	rpc        *rpc.Client
@@ -111,7 +111,7 @@ func (b *Buddy) walkAndRun(dir string, watcher *fsnotify.Watcher) error {
 			log.Println("Watcher:", err)
 			return err
 		}
-		if path == b.Lock.Path {
+		if path == b.Lock.GetPath() {
 			err := b.Lock.Set()
 			return err
 		}
@@ -195,7 +195,7 @@ func watchAndRun(buddy *Buddy) error {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Remove == fsnotify.Remove {
-				if event.Name == buddy.Lock.Path {
+				if event.Name == buddy.Lock.GetPath() {
 					buddy.Lock.Unset()
 				}
 			}
@@ -214,7 +214,7 @@ func watchAndRun(buddy *Buddy) error {
 				}
 			}
 			if event.Op&fsnotify.CloseWrite == fsnotify.CloseWrite {
-				if event.Name == buddy.Lock.Path {
+				if event.Name == buddy.Lock.GetPath() {
 					err = buddy.Lock.Set()
 					if err != nil {
 						log.Println("lock error:", err)
@@ -240,12 +240,6 @@ func watchAndRun(buddy *Buddy) error {
 	}
 }
 
-func (b *Buddy) InitLock() {
-	b.Lock.set = false
-	b.Lock.Path = filepath.Join(b.InDir, "lock")
-	b.Lock.buddy = b
-}
-
 func main() {
 	flag.Parse()
 	if o.WatchDir[len(o.WatchDir)-1] != '/' {
@@ -262,7 +256,7 @@ func main() {
 			queue:      make(chan o.WorkPackage),
 			ModePath:   filepath.Join(inDir, "mode"),
 		}
-		buddy.InitLock()
+		buddy.Lock.Init(buddy)
 		err := buddy.Connect()
 		for err != nil {
 			log.Println("RPC:", err)

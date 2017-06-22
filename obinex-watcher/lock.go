@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -19,6 +20,25 @@ func getUid(path string) (uint32, error) {
 		return 0, errors.New("No Stat_t type")
 	}
 	return (*val).Uid, nil
+}
+
+type Locker interface {
+	Get(string) bool
+	Set() error
+	Unset()
+	IsSet() bool
+	GetPath() string
+	Init(*Buddy)
+}
+
+func (l *Lock) Init(buddy *Buddy) {
+	l.set = false
+	l.Path = filepath.Join(buddy.InDir, "lock")
+	l.buddy = buddy
+}
+
+func (l Lock) GetPath() string {
+	return l.Path
 }
 
 type Lock struct {
