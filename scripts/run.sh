@@ -1,18 +1,22 @@
 #!/bin/bash
 
-shell="sudo -u i4obinex bash -c"                                                
-                                                                                
-# run once for credentials                                                      
-$shell ""                                                                       
-                                                                                
-case $HOSTNAME in                                                               
-"i4jenkins")                                                                    
-›       $shell "bin/obinex-watcher -servers faui49jenkins15 2> watcher.log" &   
-;;                                                                              
-"faui49jenkins15")                                                              
-›       $shell "bin/obinex-server 2> fastbox.log" &                             
-;;                                                                              
-*)                                                                              
-exit                                                                            
-;;                                                                              
-esac                                                                            
+murder() {
+	sudo -u i4obinex ssh $1 killall $2
+}
+
+run() {
+	sudo -u i4obinex ssh $1 "sh -c 'cd /proj/i4obinex/system/; nohup bin/$2 > /dev/null 2>$3.log &'"
+}
+
+murder i4jenkins obinex-watcher
+murder faui49jenkins12 obinex-server
+murder faui49jenkins13 obinex-server
+murder faui49jenkins14 obinex-server
+murder faui49jenkins15 obinex-server
+
+run faui49jenkins15 "obinex-server" fastbox
+run faui49jenkins14 "obinex-server" fastbox
+run faui49jenkins13 "obinex-server" fastbox
+run faui49jenkins12 "obinex-server" fastbox
+sleep 2
+run i4jenkins "obinex-watcher -servers faui49jenkins15,faui49jenkins14,faui49jenkins13,faui49jenkins12" watcher
