@@ -66,6 +66,10 @@ Examples:
 
     	obinex -box fastbox -cmd lock 24h
 
+  To execute a binary, run:
+
+    	obinex -box faui49big01 -cmd run mybin
+
   To get the output from your last submitted binary, run:
 
     	obinex -box faui49big01 -cmd output mybin
