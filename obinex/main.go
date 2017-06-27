@@ -47,13 +47,19 @@ Commands:
     	get output for the most recently submitted binary with this name
   reset
     	reset the hardware box, causing it to reboot
-  mode [linux|batch]
+  mode [bootmode]
     	set the boot mode for the hardware box, if there are no binaries queued you might want to run 'reset' afterwards
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
   will be set to automatically expire after the given duration. Currently
   supported units are "h", "m" and "s".
+
+Bootmode:
+  After changing the mode you can either wait for the currently running binary
+  to finish (and cause a reboot) or manually run 'reset'. Valid modes are:
+    - linux: boot Linux on the hardware box
+    - batch: run binaries from obinex (default and normal operation)
 
 Examples:
   To lock the fastbox for 24 hours, you would run:

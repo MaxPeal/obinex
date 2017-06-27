@@ -41,6 +41,11 @@ of obinex or by running
 
 To unlock, simply run `rm in/lock`.
 
+## Bootmodes
+
+You can change bootmode by writing the mode to `in/mode` (or using the obinex
+command). See `obinex -h` for more information and valid modes.
+
 # Setup
 
     go install gitlab.cs.fau.de/luksen/obinex/...
