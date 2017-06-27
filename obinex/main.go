@@ -45,10 +45,10 @@ Commands:
     	submit the binary for execution
   output <binary>
     	get output for the most recently submitted binary with this name
-  reset (not implemented)
-    	reset the hardware box, causing it to reboot and execute the next binary
+  reset
+    	reset the hardware box, causing it to reboot
   mode [linux|batch]
-    	set the boot mode for a hardware box
+    	set the boot mode for the hardware box, if there are no binaries queued you might want to run 'reset' afterwards
 
 Timestring:
   A string that can be parsed as a duration, such as "30m" or "4h20m". The lock
