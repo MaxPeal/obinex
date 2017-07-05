@@ -1,6 +1,6 @@
 #!/bin/bash
 
-servers=",faui49jenkins12,faui49jenkins13,faui49jenkins14,faui49jenkins15"
+servers="faui49jenkins12,faui49jenkins13,faui49jenkins14,faui49jenkins15"
 
 murder() {
 	sudo -u i4obinex ssh $1 killall $2
