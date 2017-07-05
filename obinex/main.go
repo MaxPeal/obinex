@@ -13,16 +13,18 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	o "gitlab.cs.fau.de/luksen/obinex"
 )
 
 var (
-	command  string
-	box      string
-	watchdir string
-	userdir  string
+	command     string
+	box         string
+	watchdir    string
+	userdir     string
+	watcherhost string
 )
 
 func init() {
@@ -83,21 +85,12 @@ File system interface:
 	flag.StringVar(&box, "box", o.CurrentBox(), "name of the hardwarebox you want to control")
 	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
+	flag.StringVar(&watcherhost, "watcherhost", o.WatcherHost, "host where obinex-watcher is running")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, commands)
 	}
-}
-
-func connect() *rpc.Client {
-	host := o.HostByBox[box]
-	client, err := rpc.DialHTTP("tcp", host+":12334")
-	if err != nil {
-		log.Println("dialing:", err)
-		return nil
-	}
-	return client
 }
 
 func closeErr(c io.Closer) {
@@ -252,13 +245,12 @@ func CmdOutput(args []string) error {
 }
 
 func CmdReset(args []string) error {
-	client, err := rpc.DialHTTP("tcp", o.HostByBox[box]+":12334")
+	client, err := rpc.DialHTTP("tcp", watcherhost+":12344")
 	if err != nil {
 		return err
 	}
-	var output string
-	err = client.Call("Rpc.Powercycle", struct{}{}, &output)
-	log.Printf(output)
+	uid := uint32(syscall.Getuid())
+	err = client.Call(box+".Reset", uid, &struct{}{})
 	return err
 }
 

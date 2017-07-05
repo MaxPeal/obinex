@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"net/rpc"
 	"os"
 	"os/signal"
@@ -27,6 +28,20 @@ type Buddy struct {
 	Lock       Locker
 	queue      chan o.WorkPackage
 	rpc        *rpc.Client
+}
+
+// Encapsulate RPC methods in a different type so we don't accidentally
+// export non-RPC methods.
+type BuddyRpc Buddy
+
+func (b BuddyRpc) Reset(uid uint32, _ *struct{}) error {
+	var output string
+	err := b.rpc.Call("Rpc.Powercycle", struct{}{}, &output)
+	if err != nil {
+		log.Println("RPC:", err)
+	}
+	log.Println(output)
+	return nil
 }
 
 func NewBuddy(server string) (buddy *Buddy) {
@@ -270,9 +285,32 @@ func main() {
 			err = buddy.Connect()
 		}
 
+		buddyRpc := BuddyRpc(*buddy)
+		rpc.RegisterName(buddy.Boxname, &buddyRpc)
+		rpc.HandleHTTP()
+
 		go retryWatchAndRun(buddy, done)
 		buddy.UpdateWebView(o.WebData{Mode: "batch"})
 	}
+
+	server := &http.Server{
+		Addr: ":12344",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			addr := req.RemoteAddr
+			// only allow access from these addresses
+			if strings.HasPrefix(addr, "131.188.42.") ||
+				strings.HasPrefix(addr, "[::1]") ||
+				strings.HasPrefix(addr, "127.0.0.1") {
+
+				http.DefaultServeMux.ServeHTTP(w, req)
+				return
+			}
+			http.Error(w, "", 404)
+			log.Printf("Blocked access from %s\n", addr)
+		}),
+	}
+	go server.ListenAndServe()
+
 	for range Servers {
 		<-done
 	}

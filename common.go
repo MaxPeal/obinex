@@ -35,6 +35,7 @@ var ExecCommand = func(cmd string, args ...string) (output []byte, err error) {
 	return
 }
 
+// Username returns the human readable username for a uid
 func Username(uid uint32) string {
 	username := "unknown"
 	u, err := user.LookupId(strconv.Itoa(int(uid)))
@@ -123,6 +124,9 @@ func (wp *WorkPackage) ToExecuting() {
 func (wp *WorkPackage) ToOut() {
 	wp.toY("out")
 }
+
+// WatcherHost tells us where obinex-watcher is running
+var WatcherHost = "i4jenkins"
 
 // PowercyclePath is the location of the powercycle script
 const PowercyclePath = "/proj/i4invasic/bin/powerCycle.sh"
