@@ -22,10 +22,27 @@ type Buddy struct {
 	Boxname    string
 	Servername string
 	InDir      string
-	Lock       Locker
 	ModePath   string
+	ResetPath  string
+	Lock       Locker
 	queue      chan o.WorkPackage
 	rpc        *rpc.Client
+}
+
+func NewBuddy(server string) (buddy *Buddy) {
+	box := o.ControlHosts[server]
+	inDir := filepath.Join(o.WatchDir, box, "in")
+	buddy = &Buddy{
+		Servername: server,
+		Boxname:    box,
+		InDir:      inDir,
+		ModePath:   filepath.Join(inDir, "mode"),
+		ResetPath:  filepath.Join(inDir, "reset"),
+		Lock:       &Lock{},
+		queue:      make(chan o.WorkPackage),
+	}
+	buddy.Lock.Init(buddy)
+	return
 }
 
 func (b *Buddy) Connect() error {
@@ -245,17 +262,7 @@ func main() {
 	}
 	done := make(chan bool)
 	for _, server := range Servers {
-		box := o.ControlHosts[server]
-		inDir := filepath.Join(o.WatchDir, box, "in")
-		buddy := &Buddy{
-			Servername: server,
-			Boxname:    box,
-			InDir:      inDir,
-			Lock:       &Lock{},
-			queue:      make(chan o.WorkPackage),
-			ModePath:   filepath.Join(inDir, "mode"),
-		}
-		buddy.Lock.Init(buddy)
+		buddy := NewBuddy(server)
 		err := buddy.Connect()
 		for err != nil {
 			log.Println("RPC:", err)
