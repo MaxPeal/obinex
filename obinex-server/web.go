@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-)
 
-import (
 	o "gitlab.cs.fau.de/luksen/obinex"
 	"golang.org/x/net/websocket"
 )
@@ -66,10 +64,29 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 		return
 	}
+
+	type host struct {
+		Boxname  string
+		Hostname string
+		Active   string
+	}
 	data := struct {
-		HardwareBox string
-	}{
-		HardwareBox: o.BoxByHost(hostname),
+		Hosts []host
+	}{}
+
+	for _, server := range o.Servers {
+		active := ""
+		if server == hostname {
+			active = "active"
+		}
+		data.Hosts = append(
+			data.Hosts,
+			host{
+				Boxname:  o.BoxByHost(server),
+				Hostname: server,
+				Active:   active,
+			},
+		)
 	}
 
 	err = t.Execute(w, data)
