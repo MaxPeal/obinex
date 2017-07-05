@@ -60,21 +60,18 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 		return
 	}
+
 	hostname, err := os.Hostname()
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
 	}
 	data := struct {
-		Hostname    string
 		HardwareBox string
 	}{
-		Hostname:    hostname + ".informatik.uni-erlangen.de",
 		HardwareBox: o.BoxByHost(hostname),
 	}
-	if data.HardwareBox == "mock" {
-		data.Hostname = "localhost"
-	}
+
 	err = t.Execute(w, data)
 	if err != nil {
 		fmt.Fprint(w, err)
