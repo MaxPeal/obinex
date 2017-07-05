@@ -285,7 +285,7 @@ func main() {
 		o.WatchDir += "/"
 	}
 	done := make(chan bool)
-	for _, server := range Servers {
+	for _, server := range o.Servers {
 		buddy := NewBuddy(server)
 		err := buddy.Connect()
 		for err != nil {
@@ -320,7 +320,7 @@ func main() {
 	}
 	go server.ListenAndServe()
 
-	for range Servers {
+	for range o.Servers {
 		<-done
 	}
 }

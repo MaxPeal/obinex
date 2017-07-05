@@ -78,7 +78,7 @@ func TestUnlock(t *testing.T) {
 	lock.Set()
 	lock.uid = 0
 	lock.Unset()
-	time.Sleep(10 * time.Microsecond)
+	time.Sleep(30 * time.Microsecond)
 	ok := lock.Get(path)
 	if !ok {
 		t.Errorf("ok = false, want true\n")

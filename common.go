@@ -166,8 +166,19 @@ func init() {
 	}
 }
 
+type StringList []string
+
+func (sl *StringList) String() string {
+	return strings.Join(*sl, ",")
+}
+
+func (sl *StringList) Set(value string) error {
+	*sl = StringList(strings.Split(value, ","))
+	return nil
+}
+
 // Servers lists the servers connected to by default
-var Servers = []string{
+var Servers = StringList{
 	"faui49jenkins12",
 	"faui49jenkins13",
 	"faui49jenkins14",
