@@ -250,7 +250,9 @@ func CmdReset(args []string) error {
 		return err
 	}
 	uid := uint32(syscall.Getuid())
-	err = client.Call(box+".Reset", uid, &struct{}{})
+	var output string
+	err = client.Call(box+".Reset", uid, &output)
+	log.Println(output)
 	return err
 }
 

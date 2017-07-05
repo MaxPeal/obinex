@@ -34,13 +34,22 @@ type Buddy struct {
 // export non-RPC methods.
 type BuddyRpc Buddy
 
-func (b BuddyRpc) Reset(uid uint32, _ *struct{}) error {
+func (b BuddyRpc) Reset(uid uint32, ret *string) error {
+	log.Println("RPC: powercycle")
+
+	if b.Lock.IsSet() {
+		if b.Lock.HolderUid() != uid {
+			*ret = "Locked by " + o.Username(b.Lock.HolderUid())
+			return nil
+		}
+	}
+
 	var output string
 	err := b.rpc.Call("Rpc.Powercycle", struct{}{}, &output)
 	if err != nil {
 		log.Println("RPC:", err)
+		log.Println(output)
 	}
-	log.Println(output)
 	return nil
 }
 

@@ -18,6 +18,7 @@ func (l MockLock) Get(bin string) bool { return !l.Block }
 func (l *MockLock) Set() error         { return nil }
 func (l MockLock) Unset()              {}
 func (l MockLock) IsSet() bool         { return l.Block }
+func (l MockLock) HolderUid() bool     { return l.uid }
 
 func TestSetBootMode(t *testing.T) {
 	oldExecCommand := o.ExecCommand

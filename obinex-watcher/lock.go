@@ -29,6 +29,7 @@ type Locker interface {
 	IsSet() bool
 	GetPath() string
 	Init(*Buddy)
+	HolderUid() uint32
 }
 
 func (l *Lock) Init(buddy *Buddy) {
@@ -115,4 +116,9 @@ func (l Lock) Unset() {
 
 func (l Lock) IsSet() bool {
 	return l.set
+}
+
+// HolderUid returns the uid of the lock holder. Only valid if IsSet() == true.
+func (l Lock) HolderUid() uint32 {
+	return l.uid
 }
