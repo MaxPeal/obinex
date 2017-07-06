@@ -33,7 +33,7 @@ type Buddy struct {
 type Rpc []*Buddy
 
 func (r Rpc) Reset(arg o.RpcArg, ret *string) error {
-	log.Println("RPC: powercycle")
+	log.Printf("RPC: reset %s\n", arg.Boxname)
 	for _, b := range r {
 		if b.Boxname == arg.Boxname {
 			if b.Lock.IsSet() {
