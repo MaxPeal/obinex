@@ -30,26 +30,29 @@ type Buddy struct {
 	rpc        *rpc.Client
 }
 
-// Encapsulate RPC methods in a different type so we don't accidentally
-// export non-RPC methods.
-type BuddyRpc Buddy
+type Rpc []*Buddy
 
-func (b BuddyRpc) Reset(uid uint32, ret *string) error {
+func (r Rpc) Reset(arg o.RpcArg, ret *string) error {
 	log.Println("RPC: powercycle")
+	for _, b := range r {
+		if b.Boxname == arg.Boxname {
+			if b.Lock.IsSet() {
+				if b.Lock.HolderUid() != arg.Uid {
+					*ret = "Locked by " + o.Username(b.Lock.HolderUid())
+					return nil
+				}
+			}
 
-	if b.Lock.IsSet() {
-		if b.Lock.HolderUid() != uid {
-			*ret = "Locked by " + o.Username(b.Lock.HolderUid())
-			return nil
+			var output string
+			err := b.rpc.Call("Rpc.Powercycle", struct{}{}, &output)
+			if err != nil {
+				log.Println("RPC:", err)
+				log.Println(output)
+			}
+			return err
 		}
 	}
-
-	var output string
-	err := b.rpc.Call("Rpc.Powercycle", struct{}{}, &output)
-	if err != nil {
-		log.Println("RPC:", err)
-		log.Println(output)
-	}
+	log.Printf("RPC: invalid boxname %s\n", arg.Boxname)
 	return nil
 }
 
@@ -284,6 +287,8 @@ func main() {
 	if o.WatchDir[len(o.WatchDir)-1] != '/' {
 		o.WatchDir += "/"
 	}
+
+	buddyRpc := Rpc{}
 	done := make(chan bool)
 	for _, server := range o.Servers {
 		buddy := NewBuddy(server)
@@ -294,14 +299,13 @@ func main() {
 			err = buddy.Connect()
 		}
 
-		buddyRpc := BuddyRpc(*buddy)
-		rpc.RegisterName(buddy.Boxname, &buddyRpc)
-		rpc.HandleHTTP()
-
+		buddyRpc = append(buddyRpc, buddy)
 		go retryWatchAndRun(buddy, done)
 		buddy.UpdateWebView(o.WebData{Mode: "batch"})
 	}
 
+	rpc.Register(&buddyRpc)
+	rpc.HandleHTTP()
 	server := &http.Server{
 		Addr: ":12344",
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

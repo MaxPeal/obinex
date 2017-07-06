@@ -251,7 +251,11 @@ func CmdReset(args []string) error {
 	}
 	uid := uint32(syscall.Getuid())
 	var output string
-	err = client.Call(box+".Reset", uid, &output)
+	arg := o.RpcArg{
+		Boxname: box,
+		Uid:     uid,
+	}
+	err = client.Call("Rpc.Reset", arg, &output)
 	log.Println(output)
 	return err
 }

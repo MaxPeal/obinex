@@ -26,6 +26,12 @@ type WorkPackage struct {
 	Checksum [md5.Size]byte
 }
 
+// RpcArg encapsulates rpc arguments from the clt to obinex-watcher
+type RpcArg struct {
+	Boxname string
+	Uid     uint32
+}
+
 // ExecCommand is a simple wrapper around a common usage of exec.Command.
 // Having this in a separate function also allows us to mock this function for
 // testing.
