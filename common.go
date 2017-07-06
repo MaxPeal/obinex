@@ -23,7 +23,7 @@ type WebData struct {
 
 type WorkPackage struct {
 	Path     string
-	Checksum [md5.Size]byte
+	Checksum []byte
 }
 
 // RpcArg encapsulates rpc arguments from the clt to obinex-watcher
@@ -80,7 +80,7 @@ func (wp *WorkPackage) ToQueued() error {
 	if err != nil {
 		return err
 	}
-	wp.Checksum = md5.Sum(nil)
+	wp.Checksum = h.Sum(nil)
 
 	// Create new structure
 	bin := wp.Path

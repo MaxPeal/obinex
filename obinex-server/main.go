@@ -96,12 +96,33 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	h := md5.New()
 	_, err = io.Copy(h, f)
 	i = 10
-	for err != nil {
+	for {
 		i -= 1
 		if i == -1 {
 			break
 		}
-		log.Printf("Server: checksum doesn't match, retrying...\n")
+		if err != nil {
+			log.Println(err)
+			log.Println("Server: checksum calculation failed, retrying...")
+		} else {
+			ok := true
+			checksum := h.Sum(nil)
+			if len(checksum) == len(wp.Checksum) {
+				for i, e := range checksum {
+					if e != wp.Checksum[i] {
+						ok = false
+						break
+					}
+				}
+			} else {
+				ok = false
+				log.Printf("Server: checksum sizes don't match, this should not happen\n")
+			}
+			if ok {
+				break
+			}
+			log.Printf("Server: checksum doesn't match, retrying...\n")
+		}
 		time.Sleep(100 * time.Millisecond)
 		f.Close()
 		f, _ = os.Open(wp.Path)
