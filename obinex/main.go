@@ -82,7 +82,7 @@ File system interface:
   documentation.
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")
-	flag.StringVar(&box, "box", o.CurrentBox(), "name of the hardwarebox you want to control")
+	flag.StringVar(&box, "box", "mock", "name of the hardwarebox you want to control")
 	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
 	flag.StringVar(&watcherhost, "watcherhost", o.WatcherHost, "host where obinex-watcher is running")

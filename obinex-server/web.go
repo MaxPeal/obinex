@@ -74,16 +74,16 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		Hosts []host
 	}{}
 
-	for _, server := range o.Servers {
+	for _, box := range Boxes {
 		active := ""
-		if server == hostname {
+		if box == Boxname {
 			active = "active"
 		}
 		data.Hosts = append(
 			data.Hosts,
 			host{
-				Boxname:  o.BoxByHost(server),
-				Hostname: server,
+				Boxname:  box,
+				Hostname: hostname + o.PortByBox[box],
 				Active:   active,
 			},
 		)

@@ -154,24 +154,16 @@ const SerialPath = "/dev/ttyS0"
 // EndMarker is used to find the end of hw output
 const EndMarker = "octopos-shutdown "
 
-// ControlHosts contains the mapping of buddy hostname to hardware box hostname.
-var ControlHosts map[string]string = map[string]string{
-	"localhost":       "mock",
-	"faui49jenkins12": "faui49big01",
-	"faui49jenkins13": "faui49big02",
-	"faui49jenkins14": "faui49big03",
-	"faui49jenkins15": "fastbox",
-	"faui49jenkins21": "faui49jenkins25",
+// PortByBox maps Boxnames to their webserver port
+var PortByBox map[string]string = map[string]string{
+	"mock":        ":12230",
+	"faui49big01": ":12231",
+	"faui49big02": ":12232",
+	"faui49big03": ":12233",
+	"fastbox":     ":12234",
 }
 
-var HostByBox map[string]string = make(map[string]string)
-
-func init() {
-	for host, box := range ControlHosts {
-		HostByBox[box] = host
-	}
-}
-
+// StringList can be used for list-like command line arguments
 type StringList []string
 
 func (sl *StringList) String() string {
@@ -181,32 +173,4 @@ func (sl *StringList) String() string {
 func (sl *StringList) Set(value string) error {
 	*sl = StringList(strings.Split(value, ","))
 	return nil
-}
-
-// Servers lists the servers connected to by default
-var Servers = StringList{
-	"faui49jenkins12",
-	"faui49jenkins13",
-	"faui49jenkins14",
-	"faui49jenkins15",
-	"faui49jenkins21",
-}
-
-// BoxByHost returns the hardware box corresponding to a specific host
-func BoxByHost(hostname string) (box string) {
-	box, ok := ControlHosts[hostname]
-	if !ok {
-		box = "mock"
-	}
-	return
-}
-
-// CurrentBox returns the hardware box corresponding to the current host
-func CurrentBox() (box string) {
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
-	}
-	box = BoxByHost(hostname)
-	return
 }

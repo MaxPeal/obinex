@@ -39,8 +39,7 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", wp.Path)
-	boxname := o.CurrentBox()
-	initialWebData.Queue = append(initialWebData.Queue, wp.Path[len(o.WatchDir)+len(boxname)+11:])
+	initialWebData.Queue = append(initialWebData.Queue, wp.Path[len(o.WatchDir)+len(Boxname)+11:])
 	wsChan <- initialWebData
 	runToServChan <- wp
 	<-eoeChan
@@ -231,12 +230,7 @@ func handleOutput(c chan string) {
 func main() {
 	flag.Parse()
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Fatal(err)
-	}
-	box := o.BoxByHost(hostname)
-	http.HandleFunc("/"+box, binaryServeHandler)
+	http.HandleFunc("/"+Boxname, binaryServeHandler)
 	http.HandleFunc("/", weblogHandler)
 	http.Handle("/logws", websocket.Handler(websocketHandler))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
@@ -248,7 +242,7 @@ func main() {
 	rpc.HandleHTTP()
 
 	server := &http.Server{
-		Addr: ":12334",
+		Addr: o.PortByBox[Boxname],
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			addr := req.RemoteAddr
 			// allow the following addrs to access every path
@@ -267,6 +261,6 @@ func main() {
 			log.Printf("Blocked access from %s\n", addr)
 		}),
 	}
-	log.Printf("Server: %s serving %s\n", hostname, box)
+	log.Printf("Server: %s serving %s\n", server.Addr, Boxname)
 	log.Println(graceful.ListenAndServe(server, 10*time.Second))
 }

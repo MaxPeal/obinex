@@ -56,11 +56,10 @@ func (r Rpc) Reset(arg o.RpcArg, ret *string) error {
 	return nil
 }
 
-func NewBuddy(server string) (buddy *Buddy) {
-	box := o.ControlHosts[server]
+func NewBuddy(box string) (buddy *Buddy) {
 	inDir := filepath.Join(o.WatchDir, box, "in")
 	buddy = &Buddy{
-		Servername: server,
+		Servername: Host,
 		Boxname:    box,
 		InDir:      inDir,
 		ModePath:   filepath.Join(inDir, "mode"),
@@ -74,7 +73,7 @@ func NewBuddy(server string) (buddy *Buddy) {
 
 func (b *Buddy) Connect() error {
 	log.Println("RPC: connecting to", b.Servername)
-	client, err := rpc.DialHTTP("tcp", b.Servername+":12334")
+	client, err := rpc.DialHTTP("tcp", b.Servername+o.PortByBox[b.Boxname])
 	if err != nil {
 		return err
 	}
@@ -290,8 +289,8 @@ func main() {
 
 	buddyRpc := Rpc{}
 	done := make(chan bool)
-	for _, server := range o.Servers {
-		buddy := NewBuddy(server)
+	for _, box := range Boxes {
+		buddy := NewBuddy(box)
 		err := buddy.Connect()
 		for err != nil {
 			log.Println("RPC:", err)
@@ -325,7 +324,7 @@ func main() {
 	}
 	go server.ListenAndServe()
 
-	for range o.Servers {
+	for range Boxes {
 		<-done
 	}
 }

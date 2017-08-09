@@ -133,14 +133,8 @@ func TestHandleOutput(t *testing.T) {
 }
 
 func TestRun(t *testing.T) {
-	// make sure test can be run on any server
-	oldHosts := o.ControlHosts
-	hostname, _ := os.Hostname()
-	o.ControlHosts = map[string]string{hostname: "somebox"}
-	defer func() { o.ControlHosts = oldHosts }()
-
 	rpc := Rpc{}
-	in := o.WatchDir + "somebox/executing/somedir/somebin"
+	in := o.WatchDir + "mock/executing/somedir/somebin"
 	done := make(chan bool)
 	err := error(nil)
 
@@ -150,8 +144,8 @@ func TestRun(t *testing.T) {
 	eoeChan <- struct{}{}
 	<-done
 
-	if wp.Path != o.WatchDir+"somebox/executing/somedir/somebin" {
-		t.Errorf("bin = %s, want somebin", o.WatchDir+"somebox/executing/somedir/somebin")
+	if wp.Path != o.WatchDir+"mock/executing/somedir/somebin" {
+		t.Errorf("bin = %s, want somebin", o.WatchDir+"mock/executing/somedir/somebin")
 	}
 	if err != nil {
 		t.Errorf("error = %s, want nil", err)

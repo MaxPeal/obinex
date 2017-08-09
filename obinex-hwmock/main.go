@@ -45,11 +45,11 @@ func Run() {
 	client := &http.Client{Transport: tr}
 
 	for {
-		res, err := client.Get("http://localhost:12334/mock")
+		res, err := client.Get("http://localhost:12230/mock")
 		for check(err) {
 			log.Println("Waiting for server...")
 			time.Sleep(1 * time.Second)
-			res, err = client.Get("http://localhost:12334/mock")
+			res, err = client.Get("http://localhost:12230/mock")
 		}
 
 		log.Println("Executing")
