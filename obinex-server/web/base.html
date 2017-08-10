@@ -7,7 +7,7 @@
 
 	<script type="text/javascript" charset="utf-8">
 
-var ws = new WebSocket("ws://" + location.hostname + ":12334/logws");
+var ws = new WebSocket("ws://" + location.hostname + "{{.Port}}/logws");
 ws.onmessage = function(evt) {
 	var msg = JSON.parse(evt.data);
 	if (msg.LogLine) {

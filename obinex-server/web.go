@@ -82,9 +82,9 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		data.Hosts = append(
 			data.Hosts,
 			host{
-				Boxname:  box,
-				Hostname: hostname + o.PortByBox[box],
-				Active:   active,
+				Boxname: box,
+				Port:    o.PortByBox[box],
+				Active:  active,
 			},
 		)
 	}
