@@ -66,9 +66,9 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type host struct {
-		Boxname  string
-		Hostname string
-		Active   string
+		Boxname string
+		Port    string
+		Active  string
 	}
 	data := struct {
 		Hosts []host
