@@ -12,9 +12,6 @@ run() {
 
 murder i4jenkins obinex-watcher
 murder faui49jenkins25 obinex-server
-murder faui49jenkins25 obinex-server
-murder faui49jenkins25 obinex-server
-murder faui49jenkins25 obinex-server
 
 run faui49jenkins25 "obinex-server -box fastbox -serialpath /dev/ttyS7" fastbox
 run faui49jenkins25 "obinex-server -box faui49big03 -serialpath /dev/ttyS6" big03
