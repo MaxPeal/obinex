@@ -64,8 +64,11 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		Active  string
 	}
 	data := struct {
+		Port  string
 		Hosts []host
-	}{}
+	}{
+		Port: o.PortByBox[Boxname],
+	}
 
 	for _, box := range Boxes {
 		active := ""
