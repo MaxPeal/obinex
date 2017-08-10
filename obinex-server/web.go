@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 
 	o "gitlab.cs.fau.de/luksen/obinex"
 	"golang.org/x/net/websocket"
@@ -54,12 +53,6 @@ func Broadcast(c chan o.WebData) chan<- chan o.WebData {
 // weblogHandler serves the website to view the logfile.
 func weblogHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("web/base.html", "web/status.html")
-	if err != nil {
-		fmt.Fprint(w, err)
-		return
-	}
-
-	hostname, err := os.Hostname()
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
