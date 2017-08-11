@@ -3,11 +3,11 @@
 boxes="faui49big01,faui49big02,faui49big03,fastbox"
 
 murder() {
-	sudo -u i4obinex ssh $1 killall $2
+	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 killall $2
 }
 
 run() {
-	sudo -u i4obinex ssh $1 "sh -c 'cd /proj/i4obinex/system/; nohup bin/$2 -boxes $boxes > /dev/null 2>$3.log &'"
+	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 "sh -c 'cd /proj/i4obinex/system/; nohup bin/$2 -boxes $boxes > /dev/null 2>$3.log &'"
 }
 
 murder i4jenkins obinex-watcher
