@@ -11,12 +11,12 @@ run() {
 }
 
 murder i4jenkins obinex-watcher
-murder faui49jenkins25 obinex-server
+murder faui49obinex obinex-server
 sleep 5
 
-run faui49jenkins25 "obinex-server -box fastbox -serialpath /dev/ttyS7" fastbox
-run faui49jenkins25 "obinex-server -box faui49big03 -serialpath /dev/ttyS6" big03
-run faui49jenkins25 "obinex-server -box faui49big02 -serialpath /dev/ttyS5" big02
-run faui49jenkins25 "obinex-server -box faui49big01 -serialpath /dev/ttyS4" big01
+run faui49obinex "obinex-server -box fastbox -serialpath /dev/ttyS7" fastbox
+run faui49obinex "obinex-server -box faui49big03 -serialpath /dev/ttyS6" big03
+run faui49obinex "obinex-server -box faui49big02 -serialpath /dev/ttyS5" big02
+run faui49obinex "obinex-server -box faui49big01 -serialpath /dev/ttyS4" big01
 sleep 2
-run i4jenkins "obinex-watcher -host faui49jenkins25" watcher
+run i4jenkins "obinex-watcher -host faui49obinex" watcher
