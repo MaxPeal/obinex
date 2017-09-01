@@ -179,7 +179,10 @@ func CmdLock(args []string) error {
 func CmdRun(args []string) error {
 	arg := strings.Join(args, " ")
 	target := filepath.Join(watchdir, box, "in", userdir, filepath.Base(arg))
-	os.MkdirAll(filepath.Dir(target), 0775)
+	err := os.MkdirAll(filepath.Dir(target), 0775)
+	if err != nil {
+		log.Println(err)
+	}
 	return copyFile(arg, target)
 }
 
