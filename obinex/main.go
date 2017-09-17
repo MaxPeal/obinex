@@ -285,7 +285,11 @@ func main() {
 	log.SetFlags(0)
 	flag.Parse()
 
-	err := Commands[command](flag.Args())
+	function, ok := Commands[command]
+	if !ok {
+		log.Fatalf("Unknown command `%s`, see command `help` for usage.", command)
+	}
+	err := function(flag.Args())
 	if err != nil {
 		log.Fatal(err)
 	}
