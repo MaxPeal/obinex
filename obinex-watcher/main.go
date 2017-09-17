@@ -300,7 +300,6 @@ func main() {
 
 		buddyRpc = append(buddyRpc, buddy)
 		go retryWatchAndRun(buddy, done)
-		buddy.UpdateWebView(o.WebData{Mode: "batch"})
 	}
 
 	rpc.Register(&buddyRpc)

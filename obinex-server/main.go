@@ -227,6 +227,16 @@ func handleOutput(c chan string) {
 	}
 }
 
+func updateBootMode() {
+	_, err := o.ExecCommand("nc", "-w", "2", "-z", Boxname, "22")
+	if err == nil {
+		persistentWebData.Mode = "batch"
+	} else {
+		persistentWebData.Mode = "linux"
+	}
+	wsChan <- persistentWebData
+}
+
 func main() {
 	flag.Parse()
 
@@ -237,6 +247,8 @@ func main() {
 	c := make(chan string, 10)
 	go getSerialOutput(c)
 	go handleOutput(c)
+
+	go updateBootMode()
 
 	rpc.Register(new(Rpc))
 	rpc.HandleHTTP()
