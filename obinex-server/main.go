@@ -228,13 +228,16 @@ func handleOutput(c chan string) {
 }
 
 func updateBootMode() {
-	_, err := o.ExecCommand("nc", "-w", "2", "-z", Boxname, "22")
-	if err == nil {
-		persistentWebData.Mode = "batch"
-	} else {
-		persistentWebData.Mode = "linux"
+	for {
+		_, err := o.ExecCommand("nc", "-w", "2", "-z", Boxname, "22")
+		if err == nil {
+			persistentWebData.Mode = "batch"
+		} else {
+			persistentWebData.Mode = "linux"
+		}
+		wsChan <- persistentWebData
+		time.Sleep(30 * time.Second)
 	}
-	wsChan <- persistentWebData
 }
 
 func main() {
