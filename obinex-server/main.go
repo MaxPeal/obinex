@@ -252,7 +252,7 @@ func main() {
 	go getSerialOutput(c)
 	go handleOutput(c)
 
-	go updateBootMode()
+	//go updateBootMode()
 
 	rpc.Register(new(Rpc))
 	rpc.HandleHTTP()
