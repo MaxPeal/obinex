@@ -229,7 +229,8 @@ func handleOutput(c chan string) {
 
 func updateBootMode() {
 	for {
-		_, err := o.ExecCommand("nc", "-w", "2", "-z", Boxname, "22")
+		output, err := o.ExecCommand("nc", "-w", "2", "-zv", Boxname, "22")
+		log.Println("Bootmode:", output)
 		if err == nil {
 			persistentWebData.Mode = "batch"
 		} else {
