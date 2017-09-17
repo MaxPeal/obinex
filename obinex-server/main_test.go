@@ -98,13 +98,13 @@ func TestHandleOutput(t *testing.T) {
 	wsAddChan <- outputChan
 
 	// test normal operation
-	initialWebData.Queue = []string{"foo"}
+	persistentWebData.Queue = []string{"foo"}
 	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	c <- o.EndMarker + "0\n"
 	<-eoeChan
-	if len(initialWebData.Queue) != 0 {
-		t.Errorf("len(initialWebData.Queue) = %d, expected 0", len(initialWebData.Queue))
+	if len(persistentWebData.Queue) != 0 {
+		t.Errorf("len(persistentWebData.Queue) = %d, expected 0", len(persistentWebData.Queue))
 	}
 	f, _ := os.Open("output.txt")
 	b, _ := ioutil.ReadAll(f)
@@ -115,13 +115,13 @@ func TestHandleOutput(t *testing.T) {
 	}
 
 	// test late detection
-	initialWebData.Queue = []string{"foo"}
+	persistentWebData.Queue = []string{"foo"}
 	servToOutChan <- o.WorkPackage{Path: "foo"}
 	c <- "foo\n"
 	lateEoeChan <- struct{}{}
 	<-eoeChan
-	if len(initialWebData.Queue) != 0 {
-		t.Errorf("len(initialWebData.Queue) = %d, expected 0", len(initialWebData.Queue))
+	if len(persistentWebData.Queue) != 0 {
+		t.Errorf("len(persistentWebData.Queue) = %d, expected 0", len(persistentWebData.Queue))
 	}
 	f, _ = os.Open("output.txt")
 	b, _ = ioutil.ReadAll(f)
@@ -139,7 +139,7 @@ func TestRun(t *testing.T) {
 	err := error(nil)
 
 	go func() { err = rpc.Run(o.WorkPackage{Path: in}, nil); done <- true }()
-	defer func() { initialWebData.Queue = []string{} }()
+	defer func() { persistentWebData.Queue = []string{} }()
 	wp := <-runToServChan
 	eoeChan <- struct{}{}
 	<-done
@@ -150,8 +150,8 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Errorf("error = %s, want nil", err)
 	}
-	if initialWebData.Queue[0] != "somedir/somebin" {
-		t.Errorf("initialWebData.Queue = %v, want somedir/somebin", initialWebData.Queue)
+	if persistentWebData.Queue[0] != "somedir/somebin" {
+		t.Errorf("persistentWebData.Queue = %v, want somedir/somebin", persistentWebData.Queue)
 	}
 }
 

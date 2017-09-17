@@ -39,8 +39,8 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", wp.Path)
-	initialWebData.Queue = append(initialWebData.Queue, wp.Path[len(o.WatchDir)+len(Boxname)+11:])
-	wsChan <- initialWebData
+	persistentWebData.Queue = append(persistentWebData.Queue, wp.Path[len(o.WatchDir)+len(Boxname)+11:])
+	wsChan <- persistentWebData
 	runToServChan <- wp
 	<-eoeChan
 	log.Printf("RPC: binary request return: %s\n", wp.Path)
@@ -57,11 +57,11 @@ func (r *Rpc) Powercycle(_ struct{}, output *string) error {
 
 // UpdateWebView allows obinex-watcher to send data to the web status page.
 func (r *Rpc) UpdateWebView(wd o.WebData, _ *struct{}) error {
-	initialWebData.Lock = wd.Lock
+	persistentWebData.Lock = wd.Lock
 	if wd.Mode != "" {
-		initialWebData.Mode = wd.Mode
+		persistentWebData.Mode = wd.Mode
 	}
-	wsChan <- initialWebData
+	wsChan <- persistentWebData
 	return nil
 }
 
@@ -183,10 +183,10 @@ func handleOutput(c chan string) {
 	var f *os.File
 	var err error
 	endOfBin := func() {
-		if len(initialWebData.Queue) > 0 {
-			initialWebData.Queue = initialWebData.Queue[1:]
+		if len(persistentWebData.Queue) > 0 {
+			persistentWebData.Queue = persistentWebData.Queue[1:]
 		}
-		wsChan <- initialWebData
+		wsChan <- persistentWebData
 		eoeChan <- struct{}{}
 		if f != nil {
 			f.Close()

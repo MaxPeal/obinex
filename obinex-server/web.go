@@ -16,9 +16,9 @@ var (
 	wsAddChan = Broadcast(wsChan)
 )
 
-// initialWebData holds the status information a user sees when first connecting
-// to the website.
-var initialWebData o.WebData
+// persistentWebData holds status information that needs to be resent everytime
+// the web view is updated.
+var persistentWebData o.WebData
 
 // Broadcast enables multiple reads from a channel.
 // Subscribe by sending a channel into the returned Channel. The subscribed
@@ -95,7 +95,7 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 func websocketHandler(ws *websocket.Conn) {
 	log.Printf("Web: connection to websocket")
 	// show initial information on website
-	websocket.JSON.Send(ws, initialWebData)
+	websocket.JSON.Send(ws, persistentWebData)
 	// give the channel some buffer to avoid message loss (see also comment
 	// about blocking in Broadcast
 	c := make(chan o.WebData, 10)
