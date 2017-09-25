@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="static/css/bootstrap.css" />
 
 	<script type="text/javascript" charset="utf-8">
+Notification.requestPermission()
 
 var ws = new WebSocket("ws://" + location.hostname + "{{.Port}}/logws");
 ws.onmessage = function(evt) {
@@ -24,7 +25,16 @@ ws.onmessage = function(evt) {
 		}
 	}
 	if (msg.Queue) {
-		document.getElementById("queue").innerHTML = "";
+		var q = document.getElementById("queue");
+		var oldList = Array.prototype.slice.call(q.getElementsByTagName("li"));
+		var diff = oldList.filter(function(x) {
+			return msg.Queue.indexOf(x.innerHTML) < 0;
+		});
+		if (diff.length > 0) {
+			new Notification("Binary finished", { body: diff.pop().innerHTML});
+		}
+
+		q.innerHTML = "";
 		for (var i in msg.Queue) {
 			document.getElementById("queue").innerHTML += "<li class='list-group-item'>" + msg.Queue[i] + "</li>\n";
 		}
