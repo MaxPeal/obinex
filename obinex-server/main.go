@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -49,8 +48,7 @@ func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 
 func (r *Rpc) Powercycle(_ struct{}, output *string) error {
 	log.Printf("RPC: powercycle\n")
-	cmd := exec.Command("bash", "-c", o.PowercyclePath, Boxname)
-	outputRaw, err := cmd.CombinedOutput()
+	outputRaw, err := o.ExecCommand("bash", "-c", o.PowercyclePath+" "+Boxname)
 	*output = string(outputRaw)
 	return err
 }
