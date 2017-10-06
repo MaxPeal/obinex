@@ -1,10 +1,9 @@
 before_script:
-    - git submodule init
-    - git submodule update
+    - git submodule update --init --recursive
     - cd ..
-    - rm -rf src/gitlab.cs.fau.de/luksen/
-    - mkdir -p src/gitlab.cs.fau.de/luksen/
-    - cp -r obinex src/gitlab.cs.fau.de/luksen/
+    - rm -rf src/gitlab.cs.fau.de/i4/
+    - mkdir -p src/gitlab.cs.fau.de/i4/
+    - cp -r obinex src/gitlab.cs.fau.de/i4/
     - export GOPATH=$PWD
     - export PATH=$GOPATH/bin:$PATH
     - go get golang.org/x/net/websocket
@@ -12,18 +11,18 @@ before_script:
     - go get golang.org/x/net/http2
     - go get github.com/wadey/gocovmerge
     - go install github.com/wadey/gocovmerge
-    - cd src/gitlab.cs.fau.de/luksen/obinex
+    - cd src/gitlab.cs.fau.de/i4/obinex
 
 build:
     script:
-        - go build gitlab.cs.fau.de/luksen/obinex/...
+        - go build gitlab.cs.fau.de/i4/obinex/...
 
 test:
     script:
-        - go test gitlab.cs.fau.de/luksen/obinex/obinex
-        - go test gitlab.cs.fau.de/luksen/obinex/obinex-watcher
-        - go test gitlab.cs.fau.de/luksen/obinex/obinex-server
-        - go test gitlab.cs.fau.de/luksen/obinex/obinex-hwmock
+        - go test gitlab.cs.fau.de/i4/obinex/obinex
+        - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
+        - go test gitlab.cs.fau.de/i4/obinex/obinex-server
+        - go test gitlab.cs.fau.de/i4/obinex/obinex-hwmock
         - cd integration_tests
         - ./run.sh
 
