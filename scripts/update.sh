@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e                                                                          
                                                                                 
@@ -6,7 +6,6 @@ shell="sudo -E -u i4obinex bash -c"
                                                                                 
 cd src/gitlab.cs.fau.de/luksen/obinex/                                          
 $shell "git pull"                                                               
-$shell "git submodule init"                                                     
-$shell "git submodule update"                                                   
+$shell "git submodule update --init --recursive"
 export GOPATH=/proj/i4obinex/system                                             
-$shell "go install gitlab.cs.fau.de/luksen/obinex/..."            
+$shell "go install gitlab.cs.fau.de/i4/obinex/..."
