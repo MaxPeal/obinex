@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/luksen/fsnotify"
-	o "gitlab.cs.fau.de/luksen/obinex"
+	o "gitlab.cs.fau.de/i4/obinex"
 )
 
 type Buddy struct {

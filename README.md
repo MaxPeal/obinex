@@ -48,7 +48,7 @@ command). See `obinex -h` for more information and valid modes.
 
 # Setup
 
-    go install gitlab.cs.fau.de/luksen/obinex/...
+    go install gitlab.cs.fau.de/i4/obinex/...
 
 `obinex-server/weblog.html` needs to be copied to the directory where
 `obinex-server` is run.

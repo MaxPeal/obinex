@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	o "gitlab.cs.fau.de/luksen/obinex"
+	o "gitlab.cs.fau.de/i4/obinex"
 )
 
 var (
@@ -78,7 +78,7 @@ Examples:
 
 File system interface:
   A lot of obinex actions can be executed through the file system at 'watchdir'
-  (/proj/i4obinex/). See README.md or gitlab.cs.fau.de/luksen/obinex for
+  (/proj/i4obinex/). See README.md or gitlab.cs.fau.de/i4/obinex for
   documentation.
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")

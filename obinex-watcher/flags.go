@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	o "gitlab.cs.fau.de/luksen/obinex"
+	o "gitlab.cs.fau.de/i4/obinex"
 )
 
 var Host string

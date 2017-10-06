@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	o "gitlab.cs.fau.de/luksen/obinex"
+	o "gitlab.cs.fau.de/i4/obinex"
 )
 
 func getUid(path string) (uint32, error) {

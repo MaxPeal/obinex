@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	o "gitlab.cs.fau.de/luksen/obinex"
+	o "gitlab.cs.fau.de/i4/obinex"
 	"golang.org/x/net/websocket"
 )
 
