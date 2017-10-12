@@ -187,7 +187,7 @@ func CmdRun(args []string) error {
 	// os.MkdirAll which leads to the group bit not being propagated
 	// through NFS properly (not sure why). Explicitly setting the mode
 	// again fixes this.
-	err := os.Chmod(filepath.Dir(target), 0775)
+	err = os.Chmod(filepath.Dir(target), 0775)
 	if err != nil {
 		log.Println(err)
 	}
