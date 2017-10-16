@@ -84,7 +84,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 		if wp.Parameters != "" {
 			log.Printf("Server: serving ipxe-script instead")
 			deferredWorkPackage = wp
-			fmt.Fprintf(w, "#!ipxe\r\nboot http://faui49obinex.informatik.uni-erlangen.de:%d/%s %s", o.PortByBox[Boxname], Boxname, wp.Parameters)
+			fmt.Fprintf(w, "#!ipxe\r\nboot http://faui49obinex.informatik.uni-erlangen.de%s/%s %s", o.PortByBox[Boxname], Boxname, wp.Parameters)
 			return
 		}
 	}
