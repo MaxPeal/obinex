@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -20,14 +21,15 @@ import (
 )
 
 type Buddy struct {
-	Boxname    string
-	Servername string
-	InDir      string
-	ModePath   string
-	ResetPath  string
-	Lock       Locker
-	queue      chan o.WorkPackage
-	rpc        *rpc.Client
+	Boxname        string
+	Servername     string
+	InDir          string
+	ModePath       string
+	ResetPath      string
+	Lock           Locker
+	queue          chan o.WorkPackage
+	rpc            *rpc.Client
+	parameterIndex map[string]string
 }
 
 type Rpc []*Buddy
@@ -53,19 +55,32 @@ func (r Rpc) Reset(arg o.RpcArg, ret *string) error {
 		}
 	}
 	log.Printf("RPC: invalid boxname %s\n", arg.Boxname)
-	return nil
+	return fmt.Errorf("RPC: invalid boxname %s\n", arg.Boxname)
+}
+
+func (r Rpc) RunWithParameters(arg o.RpcArg, _ *struct{}) error {
+	log.Printf("RPC: register parameters %s on %s\n", arg.FileId+" "+arg.Parameters, arg.Boxname)
+	for _, b := range r {
+		if b.Boxname == arg.Boxname {
+			b.parameterIndex[arg.FileId] = arg.Parameters
+			return nil
+		}
+	}
+	log.Printf("RPC: invalid boxname %s\n", arg.Boxname)
+	return fmt.Errorf("RPC: invalid boxname %s\n", arg.Boxname)
 }
 
 func NewBuddy(box string) (buddy *Buddy) {
 	inDir := filepath.Join(o.WatchDir, box, "in")
 	buddy = &Buddy{
-		Servername: Host,
-		Boxname:    box,
-		InDir:      inDir,
-		ModePath:   filepath.Join(inDir, "mode"),
-		ResetPath:  filepath.Join(inDir, "reset"),
-		Lock:       &Lock{},
-		queue:      make(chan o.WorkPackage),
+		Servername:     Host,
+		Boxname:        box,
+		InDir:          inDir,
+		ModePath:       filepath.Join(inDir, "mode"),
+		ResetPath:      filepath.Join(inDir, "reset"),
+		Lock:           &Lock{},
+		queue:          make(chan o.WorkPackage),
+		parameterIndex: make(map[string]string),
 	}
 	buddy.Lock.Init(buddy)
 	return
@@ -113,6 +128,13 @@ func (b *Buddy) Enqueue(path string) {
 	if b.Lock.Get(path) {
 		log.Println("Watcher: queueing", path)
 		wp := o.WorkPackage{Path: path}
+		for id, params := range b.parameterIndex {
+			if strings.HasSuffix(path, "_"+id) {
+				wp.Parameters = params
+				wp.FromCLT = true
+				delete(b.parameterIndex, id)
+			}
+		}
 		err := wp.ToQueued()
 		if err != nil {
 			log.Println("Error:", err)

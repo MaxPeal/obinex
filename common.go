@@ -21,15 +21,20 @@ type WebData struct {
 	Mode    string
 }
 
+// WorkPackage holds the data needed to serve a binary
 type WorkPackage struct {
-	Path     string
-	Checksum []byte
+	Path       string
+	Parameters string
+	Checksum   []byte
+	FromCLT    bool
 }
 
 // RpcArg encapsulates rpc arguments from the clt to obinex-watcher
 type RpcArg struct {
-	Boxname string
-	Uid     uint32
+	Boxname    string
+	Uid        uint32
+	FileId     string
+	Parameters string
 }
 
 // ExecCommand is a simple wrapper around a common usage of exec.Command.
@@ -88,6 +93,10 @@ func (wp *WorkPackage) ToQueued() error {
 	t := time.Now().Format(DirectoryDateFormat)
 	dir := filepath.Dir(bin) + "/"
 	bin = filepath.Base(bin)
+	// Remove id-string from name if present
+	if wp.FromCLT {
+		bin = bin[:strings.LastIndex(bin, "_")]
+	}
 	dir = changeStateOnPath(dir, "queued")
 	dir = filepath.Join(dir, bin+"_"+t)
 	err = os.MkdirAll(dir, 0755)

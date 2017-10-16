@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -23,6 +24,8 @@ import (
 // testDone is used by the testsuite
 var testDone = make(chan bool, 1)
 
+var deferredWorkPackage = o.WorkPackage{}
+
 // Channels for synchronizing Run calls
 var (
 	runToServChan = make(chan o.WorkPackage)
@@ -38,6 +41,9 @@ type Rpc struct{}
 // The Path should be absolute or relative to the _server_ binary.
 func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 	log.Printf("RPC: binary request: %s\n", wp.Path)
+	if wp.Parameters != "" {
+		log.Printf("RPC: parameters detected: %s\n", wp.Parameters)
+	}
 	persistentWebData.Queue = append(persistentWebData.Queue, wp.Path[len(o.WatchDir)+len(Boxname)+11:])
 	wsChan <- persistentWebData
 	runToServChan <- wp
@@ -66,9 +72,24 @@ func (r *Rpc) UpdateWebView(wd o.WebData, _ *struct{}) error {
 // binaryServeHandler serves the binaries to the hardware.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
-	lateEoeChan <- struct{}{}
-	wp := <-runToServChan
+	var wp o.WorkPackage
+	if deferredWorkPackage.Path != "" {
+		log.Printf("Server: running deferred")
+		wp = deferredWorkPackage
+		deferredWorkPackage = o.WorkPackage{}
+		log.Println(deferredWorkPackage.Path)
+	} else {
+		lateEoeChan <- struct{}{}
+		wp = <-runToServChan
+		if wp.Parameters != "" {
+			log.Printf("Server: serving ipxe-script instead")
+			deferredWorkPackage = wp
+			fmt.Fprintf(w, "#!ipxe\r\nboot http://faui49obinex.informatik.uni-erlangen.de:%d/%s %s", o.PortByBox[Boxname], Boxname, wp.Parameters)
+			return
+		}
+	}
 
+	log.Printf("Server: running %s", wp.Path)
 	// Sometimes there is a delay before we can access the file via NFS, so
 	// we wait up to a second before erroring out.
 	f, err := os.Open(wp.Path)
@@ -194,17 +215,17 @@ func handleOutput(c chan string) {
 	for {
 		select {
 		case line := <-c:
+			wsChan <- o.WebData{LogLine: line}
 			if runningBin {
 				if f != nil {
 					f.WriteString(line)
 				}
-			}
-			parseLine := strings.TrimSpace(line)
-			wsChan <- o.WebData{LogLine: line}
-			// detect end of execution early
-			if strings.HasPrefix(parseLine, o.EndMarker) ||
-				strings.HasPrefix(parseLine, "Could not boot") {
-				endOfBin()
+				parseLine := strings.TrimSpace(line)
+				// detect end of execution early
+				if strings.HasPrefix(parseLine, o.EndMarker) ||
+					strings.HasPrefix(parseLine, "Could not boot") {
+					endOfBin()
+				}
 			}
 		case <-lateEoeChan:
 			// if no end of execution was detected

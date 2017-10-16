@@ -177,8 +177,14 @@ func CmdLock(args []string) error {
 }
 
 func CmdRun(args []string) error {
-	arg := strings.Join(args, " ")
-	target := filepath.Join(watchdir, box, "in", userdir, filepath.Base(arg))
+	id := fmt.Sprintf("%d", time.Now().UnixNano())
+	bin := args[0]
+	parameters := ""
+	if len(args) > 1 {
+		parameters = strings.Join(args[1:], " ")
+	}
+	target := filepath.Join(watchdir, box, "in", userdir, filepath.Base(bin)+"_"+id)
+
 	err := os.MkdirAll(filepath.Dir(target), 0775)
 	if err != nil {
 		log.Println(err)
@@ -191,7 +197,22 @@ func CmdRun(args []string) error {
 	if err != nil {
 		log.Println(err)
 	}
-	return copyFile(arg, target)
+
+	client, err := rpc.DialHTTP("tcp", watcherhost+":12344")
+	if err != nil {
+		return err
+	}
+	arg := o.RpcArg{
+		Boxname:    box,
+		FileId:     id,
+		Parameters: parameters,
+	}
+	err = client.Call("Rpc.RunWithParameters", arg, &struct{}{})
+	if err != nil {
+		return err
+	}
+
+	return copyFile(bin, target)
 }
 
 func CmdOutput(args []string) error {
