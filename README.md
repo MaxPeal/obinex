@@ -51,3 +51,10 @@ Below you can see the overall architecture of the system. Violet and green show
 typical paths for a binary and its output.
 
 ![architecture overview](arch.png)
+
+`obinex-watcher` needs to run on the NFS host, as file notifications will not
+work otherwise. All hardware boxes need a serial and an ethernet connection to
+the "obinex host". Theoretically this could be a different host for each
+hardwarebox.
+
+The behaviour of the "magic directories" is explained above in "Usage".
