@@ -60,4 +60,4 @@ server).
 
 ## Architecture
 
-![architecture overview](arch.svg)
+![architecture overview](arch.png)
