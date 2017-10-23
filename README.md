@@ -46,16 +46,6 @@ To unlock, simply run `rm in/lock`.
 You can change bootmode by writing the mode to `in/mode` (or using the obinex
 command). See `obinex -h` for more information and valid modes.
 
-# Setup
-
-    go install gitlab.cs.fau.de/i4/obinex/...
-
-`obinex-server/weblog.html` needs to be copied to the directory where
-`obinex-server` is run.
-
-Run `obinex-server` on a buddy PC and run `obinex` on i4jenkins (or the same
-server).
-
 # Internals
 
 ## Architecture
