@@ -42,12 +42,12 @@ of obinex or by running
 To unlock, simply run `rm in/lock`.
 
 ## Bootmodes
-
 You can change bootmode by writing the mode to `in/mode` (or using the obinex
 command). See `obinex -h` for more information and valid modes.
 
 # Internals
-
 ## Architecture
+Below you can see the overall architecture of the system. Violet and green show
+typical paths for a binary and its output.
 
 ![architecture overview](arch.png)
