@@ -13,3 +13,6 @@
 [submodule "vendor/github.com/luksen/fsnotify"]
 	path = vendor/github.com/luksen/fsnotify
 	url = http://github.com/luksen/fsnotify
+[submodule "vendor/github.com/robfig/config"]
+	path = vendor/github.com/robfig/config
+	url = https://github.com/robfig/config
