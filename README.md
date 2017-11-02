@@ -47,8 +47,9 @@ command). See `obinex -h` for more information and valid modes.
 
 # Internals
 ## Architecture
-Below you can see the overall architecture of the system. Violet and green show
-typical paths for a binary and its output.
+Below you can see the overall architecture of the system. Unlabeled arrows are
+filesystem operations. Violet and green show typical paths for a binary and its
+output.
 
 ![architecture overview](arch.png)
 
