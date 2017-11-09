@@ -7,7 +7,7 @@ murder() {
 }
 
 run() {
-	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 "sh -c 'cd /proj/i4obinex/system/; nohup bin/$2 -boxes $boxes > /dev/null 2>$3.log &'"
+	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 "sh -c 'cd /proj/i4obinex/system/; nohup bin/$2 -boxes $boxes > /dev/null 2>>$3.log &'"
 }
 
 murder i4jenkins obinex-watcher
