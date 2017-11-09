@@ -23,7 +23,10 @@ build:
 
 test:
     before_script:
-        - apt-get install bats
+        - wget https://github.com/sstephenson/bats/archive/master.zip
+        - unzip master.zip
+        - cd bats-master
+        - ./install.sh /usr/local
     script:
         - go test gitlab.cs.fau.de/i4/obinex/obinex
         - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
