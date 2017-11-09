@@ -1,26 +1,15 @@
 package main
 
 import (
-	"errors"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	o "gitlab.cs.fau.de/i4/obinex"
 )
-
-func getUid(path string) (uint32, error) {
-	info, _ := os.Stat(path)
-	val, ok := info.Sys().(*syscall.Stat_t)
-	if !ok {
-		return 0, errors.New("No Stat_t type")
-	}
-	return (*val).Uid, nil
-}
 
 type Locker interface {
 	Get(string) bool
@@ -55,7 +44,7 @@ func (l Lock) Get(bin string) bool {
 	if !l.set {
 		return true
 	}
-	uid, err := getUid(bin)
+	uid, err := o.Getuid(bin)
 	if err != nil {
 		log.Println("Lock:", err)
 		return false
@@ -64,7 +53,7 @@ func (l Lock) Get(bin string) bool {
 }
 
 func (l *Lock) Set() error {
-	uid, err := getUid(l.Path)
+	uid, err := o.Getuid(l.Path)
 	if err != nil {
 		return err
 	}

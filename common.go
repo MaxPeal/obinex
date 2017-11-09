@@ -2,6 +2,7 @@ package obinex
 
 import (
 	"crypto/md5"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -44,6 +46,16 @@ var ExecCommand = func(cmd string, args ...string) (output []byte, err error) {
 	c := exec.Command(cmd, args...)
 	output, err = c.CombinedOutput()
 	return
+}
+
+// Getuid returns the owner of a file
+func Getuid(path string) (uint32, error) {
+	info, _ := os.Stat(path)
+	val, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		return 0, errors.New("No Stat_t type")
+	}
+	return (*val).Uid, nil
 }
 
 // Username returns the human readable username for a uid

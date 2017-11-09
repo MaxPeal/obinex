@@ -6,6 +6,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	o "gitlab.cs.fau.de/i4/obinex"
 )
 
 const PRE = "__obinex-test__"
@@ -34,12 +36,12 @@ func createFile() string {
 	return path
 }
 
-func TestGetUid(t *testing.T) {
+func TestGetuid(t *testing.T) {
 	path := createFile()
 	defer os.Remove(path)
 
 	uid := os.Getuid()
-	u, err := getUid(path)
+	u, err := o.Getuid(path)
 	if err != nil {
 		t.Error(err)
 	}
