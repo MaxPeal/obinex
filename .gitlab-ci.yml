@@ -22,6 +22,8 @@ build:
         - go build gitlab.cs.fau.de/i4/obinex/...
 
 test:
+    before_script:
+        apt-get install bats
     script:
         - go test gitlab.cs.fau.de/i4/obinex/obinex
         - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
