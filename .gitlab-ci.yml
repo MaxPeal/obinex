@@ -27,8 +27,6 @@ test:
         - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
         - go test gitlab.cs.fau.de/i4/obinex/obinex-server
         - go test gitlab.cs.fau.de/i4/obinex/obinex-hwmock
-        - cd integration_tests
-        - ./run.sh
 
 coverage:
     script:
