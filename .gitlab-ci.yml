@@ -1,5 +1,7 @@
+variables:
+    GIT_SUBMODULE_STRATEGY: normal
+
 before_script:
-    - git submodule update --init --recursive
     - cd ..
     - rm -rf src/gitlab.cs.fau.de/i4/
     - mkdir -p src/gitlab.cs.fau.de/i4/
