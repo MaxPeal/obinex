@@ -23,7 +23,9 @@ build:
 
 test:
     before_script:
-        - uname -a
+        - wget luksen.me/bats
+        - chmod +x bats
+        - mv bats /usr/bin/ 
     script:
         - go test gitlab.cs.fau.de/i4/obinex/obinex
         - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
