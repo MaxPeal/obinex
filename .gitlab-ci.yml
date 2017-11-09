@@ -1,3 +1,5 @@
+image: golang
+
 variables:
     GIT_SUBMODULE_STRATEGY: normal
 
