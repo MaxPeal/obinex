@@ -61,7 +61,7 @@ func TestLock(t *testing.T) {
 		t.Errorf("ok = false, want true\n")
 	}
 
-	lock.uid = 0
+	lock.uid = 123456
 	ok = lock.Get(path)
 	if ok {
 		t.Errorf("ok = true, want false\n")
