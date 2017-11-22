@@ -55,8 +55,11 @@ func (r *Rpc) Run(wp o.WorkPackage, _ *struct{}) error {
 func (r *Rpc) Powercycle(_ struct{}, output *string) error {
 	log.Printf("RPC: powercycle\n")
 	outputRaw, err := o.ExecCommand("bash", "-c", o.PowercyclePath+" "+Boxname)
-	*output = string(outputRaw)
-	return err
+	if err != nil {
+		*output = fmt.Sprintf("Error: %s\n%s", err.Error(), string(outputRaw))
+		log.Println(*output)
+	}
+	return nil
 }
 
 // UpdateWebView allows obinex-watcher to send data to the web status page.

@@ -34,22 +34,20 @@ type Buddy struct {
 
 type Rpc []*Buddy
 
-func (r Rpc) Reset(arg o.RpcArg, ret *string) error {
+func (r Rpc) Reset(arg o.RpcArg, output *string) error {
 	log.Printf("RPC: reset %s\n", arg.Boxname)
 	for _, b := range r {
 		if b.Boxname == arg.Boxname {
 			if b.Lock.IsSet() {
 				if b.Lock.HolderUid() != arg.Uid {
-					*ret = "Locked by " + o.Username(b.Lock.HolderUid())
+					*output = "Locked by " + o.Username(b.Lock.HolderUid())
 					return nil
 				}
 			}
 
-			var output string
 			err := b.rpc.Call("Rpc.Powercycle", struct{}{}, &output)
 			if err != nil {
 				log.Println("RPC:", err)
-				log.Println(output)
 			}
 			return err
 		}
