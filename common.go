@@ -127,10 +127,10 @@ func (wp *WorkPackage) ToQueued() error {
 	return nil
 }
 
-func (wp *WorkPackage) toY(y string) {
+func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 	dir := filepath.Dir(wp.Path) + "/"
 	new := changeStateOnPath(dir, y)
-	err := os.MkdirAll(filepath.Join(new, ".."), 0755)
+	err := os.MkdirAll(filepath.Join(new, ".."), perms)
 	if err != nil {
 		log.Println("Output Error:", err)
 		return
@@ -145,11 +145,11 @@ func (wp *WorkPackage) toY(y string) {
 }
 
 func (wp *WorkPackage) ToExecuting() {
-	wp.toY("executing")
+	wp.toY("executing", 0755)
 }
 
 func (wp *WorkPackage) ToOut() {
-	wp.toY("out")
+	wp.toY("out", 0777)
 }
 
 // WatcherHost tells us where obinex-watcher is running
