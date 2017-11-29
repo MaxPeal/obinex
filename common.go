@@ -142,7 +142,6 @@ func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 	err = os.Chmod(filepath.Join(new, ".."), perms)
 	if err != nil {
 		log.Println("Output Error:", err)
-		return
 	}
 
 	// Move dir
