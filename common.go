@@ -139,7 +139,7 @@ func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 	// os.MkdirAll which leads to the group bit not being propagated
 	// through NFS properly (not sure why). Explicitly setting the mode
 	// again fixes this.
-	err = os.Chmod(filepath.Dir(new, ".."), perms)
+	err = os.Chmod(filepath.Join(new, ".."), perms)
 	if err != nil {
 		log.Println("Output Error:", err)
 		return
