@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -261,12 +260,8 @@ func CmdOutput(args []string) error {
 		}
 		defer outFile.Close()
 
-		scanner := bufio.NewScanner(outFile)
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-		}
-
-		if err := scanner.Err(); err != nil {
+		_, err = io.Copy(os.Stdout, outFile)
+		if err != nil {
 			return err
 		}
 
