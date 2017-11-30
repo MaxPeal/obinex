@@ -130,7 +130,7 @@ func (wp *WorkPackage) ToQueued() error {
 func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 	dir := filepath.Dir(wp.Path) + "/"
 	new := changeStateOnPath(dir, y)
-	err := os.MkdirAll(filepath.Join(new, ".."), perms)
+	err := os.MkdirAll(filepath.Join(new, ".."), 0755)
 	if err != nil {
 		log.Println("Output Error:", err)
 		return
@@ -139,7 +139,7 @@ func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 	// os.MkdirAll which leads to the group bit not being propagated
 	// through NFS properly (not sure why). Explicitly setting the mode
 	// again fixes this.
-	err = os.Chmod(filepath.Join(new, ".."), perms)
+	err = os.Chmod(filepath.Join(new), perms)
 	if err != nil {
 		log.Println("Output Error:", err)
 	}
