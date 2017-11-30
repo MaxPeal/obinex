@@ -135,20 +135,19 @@ func (wp *WorkPackage) toY(y string, perms os.FileMode) {
 		log.Println("Output Error:", err)
 		return
 	}
-	// The chmod is needed because go uses the  mkdirat syscall for
-	// os.MkdirAll which leads to the group bit not being propagated
-	// through NFS properly (not sure why). Explicitly setting the mode
-	// again fixes this.
-	err = os.Chmod(filepath.Join(new), perms)
-	if err != nil {
-		log.Println("Output Error:", err)
-	}
 
 	// Move dir
 	err = os.Rename(dir, new)
 	if err != nil {
 		log.Println("Output Error:", err)
 	}
+
+	// Set permissions at new location
+	err = os.Chmod(filepath.Join(new), perms)
+	if err != nil {
+		log.Println("Output Error:", err)
+	}
+
 	wp.Path = filepath.Join(new, filepath.Base(wp.Path))
 }
 
