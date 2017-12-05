@@ -226,6 +226,7 @@ func ReadConfig(path, box string) {
 
 	if c.HasSection("common") {
 		WatchDir, _ = c.String("common", "watchdir")
+		WatcherHost, _ = c.String("common", "watcherhost")
 		boxesString, _ := c.String("common", "boxes")
 		boxes := strings.Split(boxesString, ",")
 		for i, box := range boxes {

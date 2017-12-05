@@ -85,6 +85,7 @@ File system interface:
 	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
 	flag.StringVar(&watcherhost, "watcherhost", o.WatcherHost, "host where obinex-watcher is running")
+	flag.StringVar(&o.ConfigPath, "config", o.ConfigPath, "`Path` to the configuration file.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
@@ -307,6 +308,7 @@ func CmdMode(args []string) error {
 
 func main() {
 	log.SetFlags(0)
+	o.ReadConfig(o.ConfigPath, "")
 	flag.Parse()
 
 	function, ok := Commands[command]
