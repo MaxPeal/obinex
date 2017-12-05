@@ -1,7 +1,7 @@
 load setup_teardown
 
 @test "run command" {
-	run_obinex -userdir . -watcherhost localhost -cmd run testbinary.sh
+	run_obinex -userdir . -cmd run testbinary.sh
 	[ "$status" -eq 0 ]
 	sleep 0.5
 
@@ -20,7 +20,7 @@ load setup_teardown
 }
 
 @test "output command" {
-	run_obinex -watcherhost localhost -cmd run testbinary.sh
+	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
 	sleep 1
 
@@ -30,7 +30,7 @@ load setup_teardown
 }
 
 @test "userdir" {
-	run_obinex -watcherhost localhost -cmd run testbinary.sh
+	run_obinex -cmd run testbinary.sh
 	[ "$status" == 0 ]
 	sleep 1
 

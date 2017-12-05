@@ -216,7 +216,6 @@ func (sl *StringList) Set(value string) error {
 }
 
 func ReadConfig(path, box string) {
-	log.Println("Reading config", path)
 	c, err := config.ReadDefault(path)
 	if err != nil {
 		log.Println(err)
@@ -232,7 +231,6 @@ func ReadConfig(path, box string) {
 		for i, box := range boxes {
 			boxes[i] = strings.TrimSpace(box)
 		}
-		log.Printf("%#v\n", boxes)
 	}
 	for _, sec := range c.Sections() {
 		if c.HasOption(sec, "port") {
@@ -251,5 +249,4 @@ func ReadConfig(path, box string) {
 		PowercyclePath, _ = c.String(box, "resetscript")
 		BootModePath, _ = c.String(box, "bootmodescript")
 	}
-	log.Println("Configuration done")
 }

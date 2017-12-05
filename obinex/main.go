@@ -19,11 +19,9 @@ import (
 )
 
 var (
-	command     string
-	box         string
-	watchdir    string
-	userdir     string
-	watcherhost string
+	command string
+	box     string
+	userdir string
 )
 
 func init() {
@@ -76,15 +74,15 @@ Examples:
     	obinex -box faui49big01 -cmd output mybin
 
 File system interface:
-  A lot of obinex actions can be executed through the file system at 'watchdir'
+  A lot of obinex actions can be executed through the file system at 'o.WatchDir'
   (/proj/i4obinex/). See README.md or gitlab.cs.fau.de/i4/obinex for
   documentation.
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")
 	flag.StringVar(&box, "box", "mock", "name of the hardwarebox you want to control")
-	flag.StringVar(&watchdir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
+	flag.StringVar(&o.WatchDir, "o.WatchDir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
-	flag.StringVar(&watcherhost, "watcherhost", o.WatcherHost, "host where obinex-watcher is running")
+	flag.StringVar(&o.WatcherHost, "o.WatcherHost", o.WatcherHost, "host where obinex-watcher is running")
 	flag.StringVar(&o.ConfigPath, "config", o.ConfigPath, "`Path` to the configuration file.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -136,7 +134,7 @@ func CmdHelp(args []string) error {
 
 func CmdLock(args []string) error {
 	arg := strings.Join(args, "")
-	path := filepath.Join(watchdir, box, "in", "lock")
+	path := filepath.Join(o.WatchDir, box, "in", "lock")
 
 	if arg == "" {
 		content, err := ioutil.ReadFile(path)
@@ -183,7 +181,7 @@ func CmdRun(args []string) error {
 	if len(args) > 1 {
 		parameters = strings.Join(args[1:], " ")
 	}
-	target := filepath.Join(watchdir, box, "in", userdir, filepath.Base(bin)+"_"+id)
+	target := filepath.Join(o.WatchDir, box, "in", userdir, filepath.Base(bin)+"_"+id)
 
 	err := os.MkdirAll(filepath.Dir(target), 0775)
 	if err != nil {
@@ -198,7 +196,7 @@ func CmdRun(args []string) error {
 		log.Println(err)
 	}
 
-	client, err := rpc.DialHTTP("tcp", watcherhost+":12344")
+	client, err := rpc.DialHTTP("tcp", o.WatcherHost+":12344")
 	if err != nil {
 		return err
 	}
@@ -217,7 +215,7 @@ func CmdRun(args []string) error {
 
 func CmdOutput(args []string) error {
 	name := strings.Join(args, " ")
-	boxdir := filepath.Join(watchdir, box)
+	boxdir := filepath.Join(o.WatchDir, box)
 
 	var mostRecentDate time.Time
 	var mostRecentDir string
@@ -273,7 +271,7 @@ func CmdOutput(args []string) error {
 }
 
 func CmdReset(args []string) error {
-	client, err := rpc.DialHTTP("tcp", watcherhost+":12344")
+	client, err := rpc.DialHTTP("tcp", o.WatcherHost+":12344")
 	if err != nil {
 		return err
 	}
@@ -296,7 +294,7 @@ func CmdMode(args []string) error {
 		arg != "interactive" {
 		return errors.New("Invalid mode. Use linux, batch, nfs or interactive.")
 	}
-	path := filepath.Join(watchdir, box, "in", "mode")
+	path := filepath.Join(o.WatchDir, box, "in", "mode")
 	os.Remove(path)
 	f, err := os.Create(path)
 	if err != nil {
