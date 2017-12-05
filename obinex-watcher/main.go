@@ -309,7 +309,7 @@ func main() {
 
 	buddyRpc := Rpc{}
 	done := make(chan bool)
-	for _, box := range Boxes {
+	for _, box := range o.Boxes {
 		buddy := NewBuddy(box)
 		err := buddy.Connect()
 		for err != nil {
@@ -343,7 +343,7 @@ func main() {
 	}
 	go server.ListenAndServe()
 
-	for range Boxes {
+	for range o.Boxes {
 		<-done
 	}
 }

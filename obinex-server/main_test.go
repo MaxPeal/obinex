@@ -73,7 +73,7 @@ func TestGetSerialOutput(t *testing.T) {
 	}
 	defer w.Close()
 	defer tty.Close()
-	SerialPath = tty.Name()
+	o.SerialPath = tty.Name()
 
 	c := make(chan string)
 	go getSerialOutput(c)

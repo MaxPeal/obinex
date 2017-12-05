@@ -70,7 +70,7 @@ func weblogHandler(w http.ResponseWriter, r *http.Request) {
 		Port: o.PortByBox[Boxname],
 	}
 
-	for _, box := range Boxes {
+	for _, box := range o.Boxes {
 		active := ""
 		if box == Boxname {
 			active = "active"

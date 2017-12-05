@@ -170,7 +170,7 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 // The output is sent line by line to the provided channel.
 func getSerialOutput(c chan string) {
 	conf := &serial.Config{
-		Name:   SerialPath,
+		Name:   o.SerialPath,
 		Baud:   115200,
 		Parity: serial.ParityNone,
 		Size:   8,
@@ -264,7 +264,18 @@ func updateBootMode() {
 }
 
 func main() {
+	// 1. parse command line flags
+	// 2. save flag values
+	// 3. parse config (might change flag values)
+	// 4. restore flag values
+	// We do this little dance because we need the value of the '-box' flag
+	// to parse the config but we also want flags to supersede config
+	// settings.
 	flag.Parse()
+	savedFlags := make(map[string]string)
+	flag.Visit(func(f *flag.Flag) { savedFlags[f.Name] = f.Value.String() })
+	o.ReadConfig(o.ConfigPath, Boxname)
+	flag.Visit(func(f *flag.Flag) { f.Value.Set(savedFlags[f.Name]) })
 
 	http.HandleFunc("/"+Boxname, binaryServeHandler)
 	http.HandleFunc("/", weblogHandler)
