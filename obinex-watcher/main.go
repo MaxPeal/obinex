@@ -302,6 +302,7 @@ func watchAndRun(buddy *Buddy) error {
 }
 
 func main() {
+	o.ReadConfig(o.ConfigPath, "")
 	flag.Parse()
 	if o.WatchDir[len(o.WatchDir)-1] != '/' {
 		o.WatchDir += "/"

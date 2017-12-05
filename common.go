@@ -215,7 +215,7 @@ func (sl *StringList) Set(value string) error {
 	return nil
 }
 
-func ReadConfig(path, section string) {
+func ReadConfig(path, box string) {
 	log.Println("Reading config", path)
 	c, err := config.ReadDefault(path)
 	if err != nil {
@@ -224,13 +224,31 @@ func ReadConfig(path, section string) {
 		return
 	}
 
-	if !c.HasSection(section) {
-		log.Println("No section \"%s\"\n", section)
-		log.Println("Using default values (or command line flags) instead")
-		return
+	if c.HasSection("common") {
+		WatchDir, _ = c.String("common", "watchdir")
+		boxesString, _ := c.String("common", "boxes")
+		boxes := strings.Split(boxesString, ",")
+		for i, box := range boxes {
+			boxes[i] = strings.TrimSpace(box)
+		}
+		log.Printf("%#v\n", boxes)
 	}
-	SerialPath, _ = c.String(section, "serialpath")
-	PowercyclePath, _ = c.String(section, "resetscript")
-	BootModePath, _ = c.String(section, "bootmodescript")
+	for _, sec := range c.Sections() {
+		if c.HasOption(sec, "port") {
+			port, _ := c.String(sec, "port")
+			PortByBox[sec] = ":" + port
+		}
+	}
+
+	if box != "" {
+		if !c.HasSection(box) {
+			log.Println("No box \"%s\"\n", box)
+			log.Println("Using default values (or command line flags) instead")
+			return
+		}
+		SerialPath, _ = c.String(box, "serialpath")
+		PowercyclePath, _ = c.String(box, "resetscript")
+		BootModePath, _ = c.String(box, "bootmodescript")
+	}
 	log.Println("Configuration done")
 }
