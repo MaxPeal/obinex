@@ -203,6 +203,8 @@ var PortByBox map[string]string = map[string]string{
 	"fastbox":     ":12234",
 }
 
+var IPXEBootLine string
+
 // StringList can be used for list-like command line arguments
 type StringList []string
 
@@ -249,5 +251,6 @@ func ReadConfig(path, box string) {
 		SerialPath, _ = c.String(box, "serialpath")
 		PowercyclePath, _ = c.String(box, "resetscript")
 		BootModePath, _ = c.String(box, "bootmodescript")
+		IPXEBootLine, _ = c.String(box, "ipxebootline")
 	}
 }
