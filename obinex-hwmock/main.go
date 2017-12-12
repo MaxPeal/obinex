@@ -16,6 +16,8 @@ import (
 	"github.com/kr/pty"
 )
 
+const TmpScriptPath = "hwmock_tmp_script"
+
 func check(err error) bool {
 	if err, ok := err.(*url.Error); ok {
 		if err, ok := err.Err.(*net.OpError); ok {
@@ -53,7 +55,7 @@ func Run() {
 		}
 
 		log.Println("Executing")
-		f, err := os.Create("hwmock_tmp_script")
+		f, err := os.Create(TmpScriptPath)
 		if err != nil {
 			res.Body.Close()
 			io.WriteString(w, fmt.Sprintln(err))
@@ -64,7 +66,7 @@ func Run() {
 		res.Body.Close()
 		f.Close()
 
-		cmd := exec.Command("bash", "hwmock_tmp_script")
+		cmd := exec.Command("bash", TmpScriptPath)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			log.Println(err)
