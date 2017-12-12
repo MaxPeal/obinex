@@ -73,6 +73,10 @@ func (r *Rpc) UpdateWebView(wd o.WebData, _ *struct{}) error {
 }
 
 // binaryServeHandler serves the binaries to the hardware.
+// It is a normal http handler that serves the next WorkPackage to the
+// hardware.  If the package has boot parameters we first serve an iPXE-script
+// with those parameters and defer the binary itself to the next call to
+// binaryServeHandler.
 func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Server: binary requested by hardware\n")
 	var wp o.WorkPackage
@@ -167,7 +171,8 @@ func binaryServeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // getSerialOutput handles the serial communication with the hardware.
-// The output is sent line by line to the provided channel.
+// This function gets the serial output from the configured device and splits
+// it into lines. The output is then sent line by line to the provided channel.
 func getSerialOutput(c chan string) {
 	conf := &serial.Config{
 		Name:   o.SerialPath,
@@ -200,6 +205,14 @@ func getSerialOutput(c chan string) {
 }
 
 // handleOutput takes output from the provided channel and distributes it.
+// The output from getSerialOutput is relayed to the web and written to the
+// output file. Relaying to web is trivial but for the file we need to split
+// the output by binary. A new output file is created once binaryServeHandler
+// passes the WorkPackage to us. The output for one binary terminates if it
+// outputs an end marker or if a new binary is requested by the hardware.
+//
+// Once the end of a binary is detected here, we also remove it from the web
+// queue.
 func handleOutput(c chan string) {
 	runningBin := false
 	var f *os.File
