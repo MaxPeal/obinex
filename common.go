@@ -227,6 +227,7 @@ func ReadConfig(path, box string) {
 		WatchDir, _ = c.String("common", "watchdir")
 		WatcherHost, _ = c.String("common", "watcherhost")
 		boxesString, _ := c.String("common", "boxes")
+		Boxes.Set(boxesString)
 		boxes := strings.Split(boxesString, ",")
 		for i, box := range boxes {
 			boxes[i] = strings.TrimSpace(box)
