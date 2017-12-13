@@ -161,47 +161,38 @@ func (wp *WorkPackage) ToOut() {
 	wp.toY("out", 0777)
 }
 
-var ConfigPath = "obinex.conf"
-
-// WatcherHost tells us where obinex-watcher is running
-var WatcherHost = "i4jenkins"
-
-// PowercyclePath is the location of the powercycle script
-var PowercyclePath = "/proj/i4invasic/bin/powerCycle.sh"
-
-// BootModePath points to the script that changes boot mode
-var BootModePath = "/proj/i4invasic/tftpboot/switchboot.pl"
-
 // DirecotryDateFormat is the format string used for timestamps in binary
 // directries
 const DirectoryDateFormat = "2006_01_02_-_15_04_05.000000000"
 
-// WatchDir is the directory watched by obinex
-// It must be absolute or relative to both obinex-server and obinex-watcher.
-var WatchDir = "/proj/i4obinex/"
-
-// SerialPath is the location of the serial connection
-var SerialPath = "/dev/ttyS0"
-
 // EndMarker is used to find the end of hw output
 const EndMarker = "octopos-shutdown "
 
+var ConfigPath = "obinex.conf"
+
+// Configurable via config file (and some via command line):
+
+// WatcherHost tells us where obinex-watcher is running
+var WatcherHost string
+
+// PowercyclePath is the location of the powercycle script
+var PowercyclePath string
+
+// BootModePath points to the script that changes boot mode
+var BootModePath string
+
+// WatchDir is the directory watched by obinex
+// It must be absolute or relative to both obinex-server and obinex-watcher.
+var WatchDir string
+
+// SerialPath is the location of the serial connection
+var SerialPath string
+
 // Boxes lists the hardware boxes served by default
-var Boxes = StringList{
-	"faui49big01",
-	"faui49big02",
-	"faui49big03",
-	"fastbox",
-}
+var Boxes = StringList{}
 
 // PortByBox maps Boxnames to their webserver port
-var PortByBox map[string]string = map[string]string{
-	"mock":        ":12230",
-	"faui49big01": ":12231",
-	"faui49big02": ":12232",
-	"faui49big03": ":12233",
-	"fastbox":     ":12234",
-}
+var PortByBox map[string]string = map[string]string{}
 
 var IPXEBootLine string
 
