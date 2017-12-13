@@ -235,7 +235,7 @@ func ReadConfig(path, box string) {
 
 	if box != "" {
 		if !c.HasSection(box) {
-			log.Println("No box \"%s\"\n", box)
+			log.Printf("No box \"%s\"\n", box)
 			log.Println("Using default values (or command line flags) instead")
 			return
 		}

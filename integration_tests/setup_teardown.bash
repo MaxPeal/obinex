@@ -2,8 +2,8 @@ setup()  {
 	./obinex-hwmock 2> out_mock &
 	sleep 0.5
 	serialpath=$( grep -o '/dev/pts/[0-9]\+' out_mock )
-	./obinex-server -watchdir . -serialpath $serialpath -box mock -boxes mock -test.coverprofile server_$BATS_TEST_NAME.cov 2> out_server &
-	./obinex-watcher -watchdir . -boxes mock -host localhost -test.coverprofile watcher_$BATS_TEST_NAME.cov 2> out_watcher &
+	./obinex-server -watchdir . -serialpath $serialpath -box mock -test.coverprofile server_$BATS_TEST_NAME.cov 2> out_server &
+	./obinex-watcher -watchdir . -host localhost -test.coverprofile watcher_$BATS_TEST_NAME.cov 2> out_watcher &
 	sleep 2
 }
 
