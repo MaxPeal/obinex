@@ -80,9 +80,9 @@ File system interface:
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")
 	flag.StringVar(&box, "box", "mock", "name of the hardwarebox you want to control")
-	flag.StringVar(&o.WatchDir, "o.WatchDir", o.WatchDir, "`path` to the directory being watched for binaries")
+	flag.StringVar(&o.WatchDir, "watchdir", o.WatchDir, "`path` to the directory being watched for binaries")
 	flag.StringVar(&userdir, "userdir", userdir, "name of your personal subdirectory")
-	flag.StringVar(&o.WatcherHost, "o.WatcherHost", o.WatcherHost, "host where obinex-watcher is running")
+	flag.StringVar(&o.WatcherHost, "watcherhost", o.WatcherHost, "host where obinex-watcher is running")
 	flag.StringVar(&o.ConfigPath, "config", o.ConfigPath, "`Path` to the configuration file.")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
