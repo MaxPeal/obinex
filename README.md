@@ -65,6 +65,6 @@ Parts of obinex are tested with unit tests and integration tests. Unit tests
 use the standard go tooling and are executed automatically in gitlab CI.
 
 Integration tests use [bats](https://github.com/sstephenson/bats) and
-obinex-hwmock and are currently not executed automatically. To run them cd into
-`integration_tests` and execute `./run.sh`. This will execute all available
-tests and generate a coverage report.
+`obinex-hwmock` and are currently not executed automatically. To run them cd
+into `integration_tests/` and execute `./run.sh`. This will execute all
+available tests and generate a coverage report.
