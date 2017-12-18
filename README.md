@@ -74,5 +74,5 @@ To test obinex locally during development you can use `obinex-hwmock`. On
 startup it will give you the path to the serial device it uses for output. Run
 `obinex-server` with the `-serialpath` option to connect to the mocked
 hardware. It will then request binaries from `obinex-server` on port `12230`
-for a hardware box called `mock` and try to execute them as bash scripts,
+for a hardwarebox called `mock` and try to execute them as bash scripts,
 returning their output back to the server.
