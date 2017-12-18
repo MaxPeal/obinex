@@ -68,3 +68,11 @@ Integration tests use [bats](https://github.com/sstephenson/bats) and
 `obinex-hwmock` and are currently not executed automatically. To run them cd
 into `integration_tests/` and execute `./run.sh`. This will execute all
 available tests and generate a coverage report.
+
+## obinex-hwmock
+To test obinex locally during development you can use `obinex-hwmock`. On
+startup it will give you the path to the serial device it uses for output. Run
+`obinex-server` with the `-serialpath` option to connect to the mocked
+hardware. It will then request binaries from `obinex-server` on port `12230`
+for a hardware box called `mock` and try to execute them as bash scripts,
+returning their output back to the server.
