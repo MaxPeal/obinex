@@ -306,14 +306,27 @@ func CmdMode(args []string) error {
 
 func main() {
 	log.SetFlags(0)
-	o.ReadConfig(o.ConfigPath, "")
+
+	// If a configuration file exists in the current working directory, use it;
+	// otherwise search for it in the binary's parent directory.
+	configPath := o.ConfigPath
+	_, err := os.Stat(configPath)
+	if err != nil {
+		ex, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		configPath = filepath.Join(filepath.Dir(filepath.Dir(ex)), o.ConfigPath)
+	}
+	o.ReadConfig(configPath, "")
+
 	flag.Parse()
 
 	function, ok := Commands[command]
 	if !ok {
 		log.Fatalf("Unknown command `%s`, see command `help` for usage.", command)
 	}
-	err := function(flag.Args())
+	err = function(flag.Args())
 	if err != nil {
 		log.Fatal(err)
 	}
