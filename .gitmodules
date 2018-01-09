@@ -16,3 +16,6 @@
 [submodule "vendor/github.com/robfig/config"]
 	path = vendor/github.com/robfig/config
 	url = https://github.com/robfig/config
+[submodule "vendor/github.com/kardianos/osext"]
+	path = vendor/github.com/kardianos/osext
+	url = https://github.com/kardianos/osext.git

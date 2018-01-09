@@ -14,6 +14,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"github.com/kardianos/osext"
 
 	o "gitlab.cs.fau.de/i4/obinex"
 )
@@ -312,11 +313,11 @@ func main() {
 	configPath := o.ConfigPath
 	_, err := os.Stat(configPath)
 	if err != nil {
-		ex, err := os.Executable()
+		exeDir, err := osext.ExecutableFolder()
 		if err != nil {
 			panic(err)
 		}
-		configPath = filepath.Join(filepath.Dir(filepath.Dir(ex)), o.ConfigPath)
+		configPath = filepath.Join(filepath.Dir(exeDir), o.ConfigPath)
 	}
 	o.ReadConfig(configPath, "")
 
