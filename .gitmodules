@@ -3,16 +3,16 @@
 	url = https://github.com/tarm/serial
 [submodule "vendor/github.com/kr/pty"]
 	path = vendor/github.com/kr/pty
-	url = http://github.com/kr/pty.git
+	url = https://github.com/kr/pty.git
 [submodule "vendor/gopkg.in/tylerb/graceful.v1"]
 	path = vendor/gopkg.in/tylerb/graceful.v1
-	url = http://gopkg.in/tylerb/graceful.v1
+	url = https://gopkg.in/tylerb/graceful.v1
 [submodule "vendor/github.com/urfave/negroni"]
 	path = vendor/github.com/urfave/negroni
-	url = http://github.com/urfave/negroni.git
+	url = https://github.com/urfave/negroni.git
 [submodule "vendor/github.com/luksen/fsnotify"]
 	path = vendor/github.com/luksen/fsnotify
-	url = http://github.com/luksen/fsnotify
+	url = https://github.com/luksen/fsnotify
 [submodule "vendor/github.com/robfig/config"]
 	path = vendor/github.com/robfig/config
 	url = https://github.com/robfig/config
