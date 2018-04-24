@@ -313,14 +313,12 @@ func main() {
 	for _, box := range o.Boxes {
 		buddy := NewBuddy(box)
 		err := buddy.Connect()
-		for err != nil {
+		if err == nil {
+			buddyRpc = append(buddyRpc, buddy)
+			go retryWatchAndRun(buddy, done)
+		} else {
 			log.Println("RPC:", err)
-			time.Sleep(time.Second)
-			err = buddy.Connect()
 		}
-
-		buddyRpc = append(buddyRpc, buddy)
-		go retryWatchAndRun(buddy, done)
 	}
 
 	rpc.Register(&buddyRpc)
