@@ -186,7 +186,7 @@ func getSerialOutput(c chan string) {
 	}
 	s, err := serial.OpenPort(conf)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error() + " opening " + o.SerialPath)
 	}
 	defer s.Close()
 
