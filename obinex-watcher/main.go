@@ -128,6 +128,7 @@ func (b *Buddy) Enqueue(path string) {
 		wp := o.WorkPackage{Path: path}
 		for id, params := range b.parameterIndex {
 			if strings.HasSuffix(path, "_"+id) {
+				log.Println("Watcher: queueing with parameters", params)
 				wp.Parameters = params
 				wp.FromCLT = true
 				delete(b.parameterIndex, id)
