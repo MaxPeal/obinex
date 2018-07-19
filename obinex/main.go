@@ -41,8 +41,8 @@ Commands:
     	print this help
   lock [timestring]
     	lock one of the boxes for yourself for the given duration or give information about the lock
-  run <binary>
-    	submit the binary for execution
+  run <binary> [parameters]
+    	submit the binary for execution (boot parameters are optional)
   output <binary>
     	get output for the most recently submitted binary with this name
   reset
@@ -69,6 +69,10 @@ Examples:
   To execute a binary, run:
 
     	obinex -box faui49big01 -cmd run mybin
+
+  To execute a binary with boot parameters, run:
+
+    	obinex -box faui49big01 -cmd run mybin param1 param2...
 
   To get the output from your last submitted binary, run:
 
