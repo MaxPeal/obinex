@@ -1,7 +1,7 @@
 #!/bin/bash
 
 murder() {
-	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 killall $2
+	sudo -u i4obinex ssh -o StrictHostKeyChecking=no $1 killall -9 $2
 }
 
 run() {
