@@ -332,6 +332,7 @@ func main() {
 			addr := req.RemoteAddr
 			// only allow access from these addresses
 			if strings.HasPrefix(addr, "131.188.42.") ||
+				strings.HasPrefix(addr, "10.188.42.") ||
 				strings.HasPrefix(addr, "[2001:638:a000:4142:") ||
 				strings.HasPrefix(addr, "[::1]") ||
 				strings.HasPrefix(addr, "127.0.0.1") {

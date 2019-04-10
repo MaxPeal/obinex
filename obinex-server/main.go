@@ -313,7 +313,9 @@ func main() {
 			addr := req.RemoteAddr
 			// allow the following addrs to access every path
 			if strings.HasPrefix(addr, "131.188.42.") ||
+				strings.HasPrefix(addr, "10.188.42.") ||
 				strings.HasPrefix(addr, "[2001:638:a000:4142:131:188:42:") ||
+				strings.HasPrefix(addr, "[2001:638:a000:4142:10:188:42:") ||
 				strings.HasPrefix(addr, "[::1]") ||
 				strings.HasPrefix(addr, "127.0.0.1") ||
 				// allow these paths from everywhere
