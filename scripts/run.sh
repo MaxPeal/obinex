@@ -16,6 +16,5 @@ run faui49obinex "obinex-server -box fastbox" fastbox
 run faui49obinex "obinex-server -box faui49big03" big03
 run faui49obinex "obinex-server -box faui49big02" big02
 run faui49obinex "obinex-server -box faui49big01" big01
-run faui49obinex "obinex-server -box faui49jitty1" jitty1
 sleep 2
 run i4jenkins "obinex-watcher -host faui49obinex" watcher
