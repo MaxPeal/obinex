@@ -41,8 +41,8 @@ Commands:
     	print this help
   lock [timestring]
     	lock one of the boxes for yourself for the given duration or give information about the lock
-  run <binary> [parameters]
-    	submit the binary for execution (boot parameters are optional)
+  run <binary|ipxe script> [parameters]
+    	submit the binary or ipxe script for execution (boot parameters are optional)
   output <binary>
     	get output for the most recently submitted binary with this name
   reset
