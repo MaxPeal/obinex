@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 type Locker interface {

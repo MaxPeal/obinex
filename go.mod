@@ -1,4 +1,4 @@
-module gitlab.cs.fau.de/i4/obinex
+module github.com/maxpeal/obinex
 
 go 1.16
 

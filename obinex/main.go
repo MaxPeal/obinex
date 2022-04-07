@@ -16,7 +16,7 @@ import (
 	"time"
 	"github.com/kardianos/osext"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 var (
@@ -80,7 +80,7 @@ Examples:
 
 File system interface:
   A lot of obinex actions can be executed through the file system at 'o.WatchDir'
-  (/proj/i4obinex/). See README.md or gitlab.cs.fau.de/i4/obinex for
+  (/proj/i4obinex/). See README.md or github.com/maxpeal/obinex for
   documentation.
 `
 	flag.StringVar(&command, "cmd", "help", "`command` to execute")

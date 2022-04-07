@@ -5,7 +5,7 @@ package main
 import (
 	"testing"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 type MockLock struct {

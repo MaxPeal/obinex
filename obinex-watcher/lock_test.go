@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 const PRE = "__obinex-test__"

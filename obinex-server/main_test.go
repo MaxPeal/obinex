@@ -14,7 +14,7 @@ import (
 
 	"github.com/kr/pty"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 	"golang.org/x/net/websocket"
 )
 

@@ -15,18 +15,18 @@ before_script:
     - go get golang.org/x/net/http2
     - go get github.com/wadey/gocovmerge
     - go install github.com/wadey/gocovmerge@latest
-    - cd src/gitlab.cs.fau.de/i4/obinex
+    - cd src/github.com/maxpeal/obinex
 
 build:
     script:
-        - go build gitlab.cs.fau.de/i4/obinex/...
+        - go build github.com/maxpeal/obinex/...
 
 test:
     script:
-        - go test gitlab.cs.fau.de/i4/obinex/obinex
-        - go test gitlab.cs.fau.de/i4/obinex/obinex-watcher
-        - go test gitlab.cs.fau.de/i4/obinex/obinex-server
-        - go test gitlab.cs.fau.de/i4/obinex/obinex-hwmock
+        - go test github.com/maxpeal/obinex/obinex
+        - go test github.com/maxpeal/obinex/obinex-watcher
+        - go test github.com/maxpeal/obinex/obinex-server
+        - go test github.com/maxpeal/obinex/obinex-hwmock
 
 coverage:
     script:

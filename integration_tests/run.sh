@@ -2,10 +2,10 @@
 
 
 function global_setup() {
-	go build gitlab.cs.fau.de/i4/obinex/obinex
-	go build gitlab.cs.fau.de/i4/obinex/obinex-hwmock
-	go test -c -cover gitlab.cs.fau.de/i4/obinex/obinex-server -tags integration -o obinex-server
-	go test -c -cover gitlab.cs.fau.de/i4/obinex/obinex-watcher -tags integration -o obinex-watcher
+	go build github.com/maxpeal/obinex/obinex
+	go build github.com/maxpeal/obinex/obinex-hwmock
+	go test -c -cover github.com/maxpeal/obinex/obinex-server -tags integration -o obinex-server
+	go test -c -cover github.com/maxpeal/obinex/obinex-watcher -tags integration -o obinex-watcher
 }
 
 

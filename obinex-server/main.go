@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 	"gopkg.in/tylerb/graceful.v1"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 // testDone is used by the testsuite

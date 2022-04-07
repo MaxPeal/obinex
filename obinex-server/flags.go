@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	o "gitlab.cs.fau.de/i4/obinex"
+	o "github.com/maxpeal/obinex"
 )
 
 var Boxname string
