@@ -5,9 +5,9 @@ variables:
 
 before_script:
     - cd ..
-    - rm -rf src/gitlab.cs.fau.de/i4/
-    - mkdir -p src/gitlab.cs.fau.de/i4/
-    - cp -r obinex src/gitlab.cs.fau.de/i4/
+    - rm -rf src/github.com/maxpeal/
+    - mkdir -p src/github.com/maxpeal/
+    - cp -r obinex src/github.com/maxpeal/
     - export GOPATH=$PWD
     - export PATH=$GOPATH/bin:$PATH
     - go get golang.org/x/net/websocket
