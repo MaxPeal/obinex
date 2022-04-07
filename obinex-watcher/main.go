@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/luksen/fsnotify"
+	"github.com/fsnotify/fsnotify"
 	o "gitlab.cs.fau.de/i4/obinex"
 )
 
